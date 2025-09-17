@@ -1,0 +1,166 @@
+-- ===========================
+-- User Table
+-- ===========================
+CREATE TABLE User (
+    UserID INT AUTO_INCREMENT PRIMARY KEY,
+    UserName VARCHAR(50) NOT NULL,
+    Email VARCHAR(50) UNIQUE NOT NULL,
+    PasswordHash VARCHAR(100) NOT NULL,
+    PhoneNumber VARCHAR(20),
+    Role VARCHAR(50),
+    CreatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    LastLogin DATETIME,
+    isActive BOOLEAN DEFAULT TRUE,
+    User_Address VARCHAR(100)
+);
+
+-- ===========================
+-- Category Table
+-- ===========================
+CREATE TABLE Category (
+    CategoryID INT PRIMARY KEY,
+    CategoryName VARCHAR(50) NOT NULL,
+    Description VARCHAR(100),
+    ParentCategoryID INT,
+    FOREIGN KEY (ParentCategoryID) REFERENCES Category(CategoryID)
+);
+
+-- ===========================
+-- Product Table
+-- ===========================
+CREATE TABLE Product (
+    ProductID INT PRIMARY KEY,
+    ProductName VARCHAR(50) NOT NULL,
+    Description VARCHAR(100),
+    Brand VARCHAR(50),
+    Base_price DECIMAL(10,2),
+    CategoryID INT,
+    Availability BOOLEAN DEFAULT TRUE,
+    CreatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    SKU VARCHAR(50) UNIQUE,
+    FOREIGN KEY (CategoryID) REFERENCES Category(CategoryID)
+);
+
+-- ===========================
+-- Variant Table
+-- ===========================
+CREATE TABLE Variant (
+    VariantID INT PRIMARY KEY,
+    ProductID INT,
+    Colour VARCHAR(50),
+    Size VARCHAR(50),
+    Model VARCHAR(50),
+    Varient_Price DECIMAL(10,2),
+    StockQuantity INT,
+    RecorderLevel INT,
+    Status VARCHAR(20),
+    FOREIGN KEY (ProductID) REFERENCES Product(ProductID)
+);
+
+-- ===========================
+-- Cart Table
+-- ===========================
+CREATE TABLE Cart (
+    CartID INT PRIMARY KEY,
+    UserID INT,
+    Status VARCHAR(20),
+    FOREIGN KEY (UserID) REFERENCES User(UserID)
+);
+
+-- ===========================
+-- Cart_Item Table
+-- ===========================
+CREATE TABLE Cart_Item (
+    CartID INT,
+    VariantID INT,
+    Quantity INT,
+    AddedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    UpdatedAt TIMESTAMP,
+    PRIMARY KEY (CartID, VariantID),
+    FOREIGN KEY (CartID) REFERENCES Cart(CartID),
+    FOREIGN KEY (VariantID) REFERENCES Variant(VariantID)
+);
+
+-- ===========================
+-- Order Table
+-- ===========================
+CREATE TABLE `Order` (
+    OrderID INT AUTO_INCREMENT PRIMARY KEY,
+    OrderDate DATETIME DEFAULT CURRENT_TIMESTAMP,
+    Status VARCHAR(50),
+    TotalAmount DECIMAL(10,2),
+    UserID INT,
+    Special_Instructions VARCHAR(100),
+    FOREIGN KEY (UserID) REFERENCES User(UserID)
+);
+
+-- ===========================
+-- Order_Item Table
+-- ===========================
+CREATE TABLE Order_Item (
+    OrderID INT,
+    VariantID INT,
+    Quantity INT,
+    UnitPrice DECIMAL(10,2),
+    SubTotal DECIMAL(10,2),
+    PRIMARY KEY (OrderID, VariantID),
+    FOREIGN KEY (OrderID) REFERENCES `Order`(OrderID),
+    FOREIGN KEY (VariantID) REFERENCES Variant(VariantID)
+);
+
+-- ===========================
+-- Delivery Table
+-- ===========================
+CREATE TABLE Delivery (
+    Delivery_ID INT AUTO_INCREMENT PRIMARY KEY,
+    Order_ID INT,
+    Delivery_Method VARCHAR(50),
+    Address VARCHAR(100),
+    Status VARCHAR(50),
+    Estimated_Delivery TIMESTAMP,
+    Actual_Delivery TIMESTAMP,
+    Estimated_days INT,
+    Tracking_ID INT,
+    Delivery_Roles VARCHAR(50),
+    FOREIGN KEY (Order_ID) REFERENCES `Order`(OrderID)
+);
+
+-- ===========================
+-- Report Table
+-- ===========================
+CREATE TABLE Report (
+    ReportID INT AUTO_INCREMENT PRIMARY KEY,
+    Report_Type VARCHAR(50),
+    GeneratedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FilePath VARCHAR(100),
+    Data_Range VARCHAR(50)
+);
+
+-- ===========================
+-- AuditLog Table
+-- ===========================
+CREATE TABLE AuditLog (
+    LogID INT AUTO_INCREMENT PRIMARY KEY,
+    UserID INT,
+    TableName VARCHAR(50),
+    Column_Name VARCHAR(50),
+    Action VARCHAR(50),
+    OldValue VARCHAR(255),
+    NewValue VARCHAR(255),
+    CreatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (UserID) REFERENCES User(UserID)
+);
+
+-- ===========================
+-- Transaction Table
+-- ===========================
+CREATE TABLE Transaction (
+    PaymentID INT AUTO_INCREMENT PRIMARY KEY,
+    OrderID INT,
+    Payment_Method VARCHAR(50),
+    Status VARCHAR(50),
+    Transaction_Date DATETIME DEFAULT CURRENT_TIMESTAMP,
+    Total_Amount DECIMAL(10,2),
+    Gateway_Response VARCHAR(100),
+    FOREIGN KEY (OrderID) REFERENCES `Order`(OrderID)
+);
