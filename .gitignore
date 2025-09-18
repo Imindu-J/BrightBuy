@@ -1,0 +1,6 @@
+frontend_ss/
+node_modules/
+
+*.txt
+*.pdf
+.env
