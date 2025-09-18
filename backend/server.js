@@ -13,7 +13,7 @@ app.use('/admin', require('./routes/admin'));
 app.use('/categories', require('./routes/categories'));
 app.use('/variants', require('./routes/variants'));
 app.use('/cart', require('./routes/cart'));
-app.use('/orders', require('./routes/orders'));
+app.use('/order', require('./routes/order'));
 app.use('/delivery', require('./routes/delivery'));
 app.use('/transactions', require('./routes/transactions'));
 app.use('/reports', require('./routes/reports'));
