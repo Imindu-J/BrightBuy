@@ -1,10 +1,21 @@
 const express = require('express');
 const cors = require('cors');
 require('dotenv').config();
+const pool = require('./utils/db'); // import your MySQL pool
 
 const app = express();
 app.use(cors());
 app.use(express.json());
+
+// Test database connection
+(async () => {
+    try {
+        const [rows] = await pool.query('SELECT NOW() AS currentTime');
+        console.log('Database connected! Current time:', rows[0].currentTime);
+    } catch (err) {
+        console.error('Database connection failed:', err);
+    }
+})();
 
 // Routes
 app.use('/auth', require('./routes/auth'));
