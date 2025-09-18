@@ -43,7 +43,7 @@ CREATE TABLE User (
 );
 
 -- Order Table
-CREATE TABLE Order (
+CREATE TABLE Customer_Order (
   OrderID int AUTO_INCREMENT,
   OrderDate datetime DEFAULT CURRENT_TIMESTAMP,
   Status varchar(50),
@@ -77,7 +77,7 @@ CREATE TABLE Order_Item (
   UnitPrice decimal(10,2),
   SubTotal decimal(10,2),
   PRIMARY KEY (OrderID, VariantID),
-  FOREIGN KEY (OrderID) REFERENCES Order(OrderID) ON DELETE CASCADE,
+  FOREIGN KEY (OrderID) REFERENCES Customer_Order(OrderID) ON DELETE CASCADE,
   FOREIGN KEY (VariantID) REFERENCES Variant(VariantID) ON DELETE CASCADE
 );
 
@@ -136,7 +136,7 @@ CREATE TABLE Transaction (
   Total_Amount decimal(10,2),
   Gateway_Response varchar(255),
   PRIMARY KEY (PaymentID),
-  FOREIGN KEY (OrderID) REFERENCES Order(OrderID) ON DELETE CASCADE
+  FOREIGN KEY (OrderID) REFERENCES Customer_Order(OrderID) ON DELETE CASCADE
 );
 
 -- Delivery Table
@@ -152,5 +152,5 @@ CREATE TABLE Delivery (
   Tracking_ID int,
   Delivery_Roles varchar(50),
   PRIMARY KEY (Delivery_ID),
-  FOREIGN KEY (Order_ID) REFERENCES Order(OrderID) ON DELETE CASCADE
+  FOREIGN KEY (Order_ID) REFERENCES Customer_Order(OrderID) ON DELETE CASCADE
 );
