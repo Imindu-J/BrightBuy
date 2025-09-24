@@ -1,0 +1,2 @@
+npm install express mysql2 bcryptjs jsonwebtoken dotenv
+npm install --save-dev nodemon
