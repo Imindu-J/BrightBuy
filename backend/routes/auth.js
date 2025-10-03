@@ -36,7 +36,17 @@ router.post('/login', async (req, res) => {
       process.env.JWT_SECRET,
       { expiresIn: '1h' }
     );
-    res.json({ token, role: user.Role });
+
+    // Send token + user info (without password hash)
+    res.json({
+      token,
+      user: {
+        UserID: user.UserID,
+        UserName: user.UserName,
+        Email: user.Email,
+        Role: user.Role
+      }
+    });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
