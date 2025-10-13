@@ -6,7 +6,7 @@ function authorize(roles = []) {
     if (!token) return res.sendStatus(401);
 
     jwt.verify(token, process.env.JWT_SECRET, (err, user) => {
-      if (err) return res.sendStatus(403);
+      if (err) return res.sendStatus(403).json({ error: 'Invalid or expired token' });
 
       if (roles.length && !roles.includes(user.role)) return res.sendStatus(403);
 
