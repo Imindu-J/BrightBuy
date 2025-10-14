@@ -1,0 +1,105 @@
+INSERT INTO Category (CategoryID, CategoryName, Description, ParentCategoryID) VALUES
+(1, 'Electronics', 'Devices and gadgets', NULL),
+(2, 'Clothing', 'Apparel and fashion', NULL),
+(3, 'Stationery', 'Office and school supplies', NULL),
+(4, 'Home Appliances', 'Appliances for home', NULL),
+(5, 'Sports', 'Sporting goods', NULL),
+(6, 'Toys', 'Toys for children', NULL),
+(7, 'Groceries', 'Daily groceries', NULL),
+(8, 'Mobile Phone', 'High performance mobile phones', 1),
+(9, 'Laptop', 'High performance laptop', 1),
+(10, 'Books', 'Books of all genres', 3),
+(11, 'Furniture', 'Furniture for homes and offices', 4);
+
+
+INSERT INTO product (ProductID, ProductName, Description, Brand, Base_price, CategoryID, SKU) VALUES
+(1, 'Samsung Galaxy S23', 'Latest flagship smartphone', 'Samsung', 250000.00, 1, 'ELEC001'),
+(2, 'Acer Nitro 5', 'Gaming laptop with Intel i7', 'Acer', 300000.00, 1, 'ELEC002'),
+(3, 'Lewis Denim Jeans', 'Slim fit blue jeans', 'Lewis', 4500.00, 2, 'CLOT001'),
+(4, 'Adidas Sports T-shirt', 'Breathable sports t-shirt', 'Adidas', 2500.00, 2, 'CLOT002'),
+(5, 'Harry Potter Book Set', 'Complete 7-book series', 'Bloomsbury', 12000.00, 3, 'BOOK001'),
+(6, 'Calculus Textbook', 'Advanced engineering calculus', 'Pearson', 3500.00, 3, 'BOOK002'),
+(7, 'Samsung Microwave 800W', 'Microwave oven with grill', 'Samsung', 18000.00, 4, 'HOME001'),
+(8, 'LG Double Door Fridge', 'Frost-free refrigerator', 'LG', 95000.00, 4, 'HOME002'),
+(9, 'Nike Football', 'Standard size 5 football', 'Nike', 3500.00, 5, 'SPORT001'),
+(10, 'Yonex Tennis Racket', 'Professional grade tennis racket', 'Yonex', 15000.00, 5, 'SPORT002'),
+(11, 'LEGO Star Wars Set', '1000-piece LEGO set', 'LEGO', 12000.00, 6, 'TOY001'),
+(12, 'Ravensburger Puzzle', '1000-piece landscape puzzle', 'Ravensburger', 2500.00, 6, 'TOY002'),
+(13, 'Caprice Basmati Rice 5kg', 'Premium basmati rice', 'Caprice', 2200.00, 7, 'GROC001'),
+(14, 'Anchor Milk Powder 1kg', 'Fortified milk powder', 'Anchor', 2500.00, 7, 'GROC002'),
+(15, 'Himalaya Vitamin C 500mg', 'Boosts immunity', 'Himalaya', 1200.00, 8, 'HEAL001'),
+(16, 'Optimum Nutrition Whey Protein', '1kg vanilla protein powder', 'Optimum Nutrition', 8000.00, 8, 'HEAL002'),
+(17, 'Maybelline Matte Lipstick', 'Long-lasting matte lipstick', 'Maybelline', 1500.00, 9, 'BEAU001'),
+(18, 'Nivea Face Cream', 'Moisturizing cream for all skin types', 'Nivea', 2000.00, 9, 'BEAU002'),
+(19, 'Camlin 200-Page Notebook', 'College ruled notebook', 'Camlin', 600.00, 10, 'STAT001'),
+(20, 'Pilot Ballpoint Pen', 'Smooth writing ballpoint pen', 'Pilot', 250.00, 10, 'STAT002');
+
+
+INSERT INTO Variant (ProductID, Colour, Size, Model, Variant_Price, StockQuantity, RecorderLevel, Status) VALUES
+-- Samsung Galaxy S23
+(1, 'Phantom Black', '128GB', 'S23-BLK', 250000.00, 50, 5, 'Available'),
+(1, 'Cream White', '256GB', 'S23-WHT', 270000.00, 30, 5, 'Available'),
+(1, 'Green', '512GB', 'S23-GRN', 300000.00, 20, 5, 'Available'),
+
+-- Acer Nitro 5
+(2, 'Black', '16GB RAM', 'Nitro5-16', 300000.00, 40, 5, 'Available'),
+(2, 'Red', '32GB RAM', 'Nitro5-32', 350000.00, 25, 5, 'Available'),
+
+-- Lewis Denim Jeans
+(3, 'Blue', 'S', 'LDJ-S', 4500.00, 100, 10, 'Available'),
+(3, 'Blue', 'M', 'LDJ-M', 4500.00, 120, 10, 'Available'),
+(3, 'Blue', 'L', 'LDJ-L', 4500.00, 80, 10, 'Available'),
+
+-- Adidas Sports T-shirt
+(4, 'White', 'S', 'AST-S', 2500.00, 150, 20, 'Available'),
+(4, 'Black', 'M', 'AST-M', 2500.00, 140, 20, 'Available'),
+(4, 'Blue', 'L', 'AST-L', 2500.00, 120, 20, 'Available'),
+
+-- Harry Potter Book Set
+(5, 'Default', '7 Books', 'HP7', 12000.00, 60, 5, 'Available'),
+
+-- Calculus Textbook
+(6, 'Default', 'Hardcover', 'CALC-HC', 3500.00, 80, 5, 'Available'),
+
+-- Samsung Microwave 800W
+(7, 'Silver', 'Standard', 'SM800-SLV', 18000.00, 40, 5, 'Available'),
+
+-- LG Double Door Fridge
+(8, 'White', '500L', 'LG-500-W', 95000.00, 15, 2, 'Available'),
+(8, 'Black', '500L', 'LG-500-B', 97000.00, 10, 2, 'Available'),
+
+-- Nike Football
+(9, 'White', 'Size 5', 'NF5-W', 3500.00, 100, 20, 'Available'),
+
+-- Yonex Tennis Racket
+(10, 'Red', 'Standard', 'YT-R', 15000.00, 50, 5, 'Available'),
+
+-- LEGO Star Wars Set
+(11, 'Multicolor', '1000 Pieces', 'LEGO-SW1000', 12000.00, 30, 5, 'Available'),
+
+-- Ravensburger Puzzle
+(12, 'Multicolor', '1000 Pieces', 'RB-P1000', 2500.00, 40, 5, 'Available'),
+
+-- Caprice Basmati Rice 5kg
+(13, 'White', '5kg', 'CR5', 2200.00, 200, 20, 'Available'),
+
+-- Anchor Milk Powder 1kg
+(14, 'White', '1kg', 'AMP1', 2500.00, 180, 20, 'Available'),
+
+-- Himalaya Vitamin C 500mg
+(15, 'Orange', '500mg', 'HVC500', 1200.00, 100, 10, 'Available'),
+
+-- Optimum Nutrition Whey Protein
+(16, 'Vanilla', '1kg', 'ONWP-V', 8000.00, 60, 5, 'Available'),
+
+-- Maybelline Matte Lipstick
+(17, 'Red', '3g', 'MML-R', 1500.00, 80, 10, 'Available'),
+
+-- Nivea Face Cream
+(18, 'White', '50ml', 'NFC-50', 2000.00, 70, 10, 'Available'),
+
+-- Camlin 200-Page Notebook
+(19, 'Blue', '200 Pages', 'CN-200B', 600.00, 150, 20, 'Available'),
+
+-- Pilot Ballpoint Pen
+(20, 'Black', 'Standard', 'PB-STD', 250.00, 200, 20, 'Available');

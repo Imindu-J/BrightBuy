@@ -1,0 +1,161 @@
+-- Create Database
+CREATE DATABASE IF NOT EXISTS BrightBuy;
+USE BrightBuy;
+
+-- Category Table
+CREATE TABLE Category (
+  CategoryID int AUTO_INCREMENT,
+  CategoryName varchar(50),
+  Description varchar(100),
+  ParentCategoryID int,
+  PRIMARY KEY (CategoryID),
+  FOREIGN KEY (ParentCategoryID) REFERENCES Category(CategoryID) ON DELETE SET NULL
+);
+
+-- Product Table
+CREATE TABLE Product (
+  ProductID int AUTO_INCREMENT,
+  ProductName varchar(50),
+  Description varchar(100),
+  Brand varchar(50),
+  Base_price decimal(10,2),
+  CategoryID int,
+  Availability boolean DEFAULT TRUE,
+  CreatedAt timestamp DEFAULT CURRENT_TIMESTAMP,
+  SKU varchar(50),
+  PRIMARY KEY (ProductID),
+  FOREIGN KEY (CategoryID) REFERENCES Category(CategoryID) ON DELETE SET NULL
+);
+
+-- User Table
+CREATE TABLE User (
+  UserID int AUTO_INCREMENT,
+  UserName varchar(50),
+  Email varchar(50) UNIQUE,
+  PasswordHash varchar(255),
+  PhoneNumber varchar(20),
+  Role varchar(50),
+  CreatedAt timestamp DEFAULT CURRENT_TIMESTAMP,
+  LastLogin datetime,
+  isActive boolean DEFAULT TRUE,
+  User_Address varchar(255),
+  PRIMARY KEY (UserID)
+);
+
+-- Order Table
+CREATE TABLE Customer_Order (
+  OrderID int AUTO_INCREMENT,
+  OrderDate datetime DEFAULT CURRENT_TIMESTAMP,
+  Status varchar(50),
+  TotalAmount decimal(10,2),
+  UserID int,
+  Special_Instructions varchar(100),
+  PRIMARY KEY (OrderID),
+  FOREIGN KEY (UserID) REFERENCES User(UserID) ON DELETE CASCADE
+);
+
+-- Variant Table
+CREATE TABLE Variant (
+  VariantID int AUTO_INCREMENT,
+  ProductID int,
+  Colour varchar(50),
+  Size varchar(50),
+  Model varchar(50),
+  Variant_Price decimal(10,2),
+  StockQuantity int,
+  RecorderLevel int,
+  Status varchar(20),
+  PRIMARY KEY (VariantID),
+  FOREIGN KEY (ProductID) REFERENCES Product(ProductID) ON DELETE CASCADE
+);
+
+-- Order_Item Table
+CREATE TABLE Order_Item (
+  OrderID int,
+  VariantID int,
+  Quantity int,
+  UnitPrice decimal(10,2),
+  SubTotal decimal(10,2),
+  PRIMARY KEY (OrderID, VariantID),
+  FOREIGN KEY (OrderID) REFERENCES Customer_Order(OrderID) ON DELETE CASCADE,
+  FOREIGN KEY (VariantID) REFERENCES Variant(VariantID) ON DELETE CASCADE
+);
+
+-- Cart Table
+CREATE TABLE Cart (
+  CartID int AUTO_INCREMENT,
+  UserID int,
+  Status varchar(20),
+  PRIMARY KEY (CartID),
+  FOREIGN KEY (UserID) REFERENCES User(UserID) ON DELETE CASCADE
+);
+
+-- Cart_Item Table
+CREATE TABLE Cart_Item (
+  CartID int,
+  VariantID int,
+  Quantity int,
+  AddedAt timestamp DEFAULT CURRENT_TIMESTAMP,
+  UpdatedAt timestamp DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (CartID, VariantID),
+  FOREIGN KEY (CartID) REFERENCES Cart(CartID) ON DELETE CASCADE,
+  FOREIGN KEY (VariantID) REFERENCES Variant(VariantID) ON DELETE CASCADE
+);
+
+-- AuditLog Table
+CREATE TABLE AuditLog (
+  LogID int AUTO_INCREMENT,
+  UserID int,
+  TableName varchar(50),
+  Column_Name varchar(50),
+  Action varchar(50),
+  OldValue decimal(10,2),
+  NewValue decimal(10,2),
+  CreatedAt timestamp DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (LogID),
+  FOREIGN KEY (UserID) REFERENCES User(UserID) ON DELETE SET NULL
+);
+
+-- Report Table
+CREATE TABLE Report (
+  ReportID int AUTO_INCREMENT,
+  Report_Type varchar(50),
+  GeneratedAt timestamp DEFAULT CURRENT_TIMESTAMP,
+  FilePath varchar(255),
+  Data_Range varchar(50),
+  PRIMARY KEY (ReportID)
+);
+
+-- Transaction Table
+CREATE TABLE Transaction (
+  PaymentID int AUTO_INCREMENT,
+  OrderID int,
+  Payment_Method varchar(20),
+  Status varchar(50),
+  Transaction_Date datetime DEFAULT CURRENT_TIMESTAMP,
+  Total_Amount decimal(10,2),
+  Gateway_Response varchar(255),
+  PRIMARY KEY (PaymentID),
+  FOREIGN KEY (OrderID) REFERENCES Customer_Order(OrderID) ON DELETE CASCADE
+);
+
+-- Delivery Table
+CREATE TABLE Delivery (
+  Delivery_ID int AUTO_INCREMENT,
+  Order_ID int,
+  Delivery_Method varchar(50),
+  Address varchar(255),
+  Status varchar(50),
+  Estimated_Delivery timestamp,
+  Actual_Delivery timestamp,
+  Estimated_days int,
+  Tracking_ID int,
+  Delivery_Roles varchar(50),
+  PRIMARY KEY (Delivery_ID),
+  FOREIGN KEY (Order_ID) REFERENCES Customer_Order(OrderID) ON DELETE CASCADE
+);
+
+
+-- Added image url column to product Table
+ALTER TABLE Product
+ADD COLUMN ImageURL VARCHAR(255);
