@@ -154,3 +154,8 @@ CREATE TABLE Delivery (
   PRIMARY KEY (Delivery_ID),
   FOREIGN KEY (Order_ID) REFERENCES Customer_Order(OrderID) ON DELETE CASCADE
 );
+
+
+-- Added image url column to product Table
+ALTER TABLE Product
+ADD COLUMN ImageURL VARCHAR(255);
