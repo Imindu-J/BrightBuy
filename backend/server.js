@@ -13,15 +13,7 @@ app.use(express.json());
 app.use('/images', express.static('public/images'));
 
 // Test DB connection at startup
-(async () => {
-  try {
-    const [rows] = await pool.query('SELECT NOW() AS currentTime');
-    console.log('Database connected! Current time:', rows[0].currentTime);
-  } catch (err) {
-    console.error('Database connection failed:', err.message);
-    process.exit(1); // Exit if DB is not connected
-  }
-})();
+
 
 // Route Imports
 const authRoutes = require('./routes/auth');
