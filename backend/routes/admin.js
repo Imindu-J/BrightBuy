@@ -21,7 +21,10 @@ router.post('/create-user', authorize(['admin']), async (req, res) => {
 
     res.json({ message: `${role} created successfully`, userId: result.insertId});
   } catch (err) {
-    res.status(500).json({ error: err.message});
+    if (err.code === 'ER_DUP_ENTRY') {
+      return res.status(400).json({ error: 'User with this email already exists' });
+    }
+    res.status(500).json({ error: err.message });
   }
 });
 
