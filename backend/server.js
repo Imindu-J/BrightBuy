@@ -13,7 +13,16 @@ app.use(express.json());
 app.use('/images', express.static('public/images'));
 
 // Test DB connection at startup
-
+// Test connection on startup
+(async () => {
+  try {
+    const [rows] = await pool.query('SELECT 1 AS test');
+    console.log('Database connected! Test query returned:', rows[0].test);
+  } catch (err) {
+    console.error('Database connection failed:', err.message);
+    process.exit(1); // Exit if DB cannot connect
+  }
+})();
 
 // Route Imports
 const authRoutes = require('./routes/auth');
