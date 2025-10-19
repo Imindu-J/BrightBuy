@@ -1,0 +1,151 @@
+-- Categories
+INSERT INTO Category (CategoryID, CategoryName, Description, ParentCategoryID) VALUES
+(1, 'Mobile Phones', 'Smartphones and feature phones', NULL),
+(2, 'Laptops', 'High-performance laptops', NULL),
+(3, 'Tablets', 'Portable tablets', NULL),
+(4, 'Wearables', 'Smart watches and fitness trackers', NULL),
+(5, 'Televisions', 'LED, OLED, QLED TVs', 10),
+(6, 'Audio', 'Headphones, speakers, and audio devices', NULL),
+(7, 'Cameras', 'DSLRs, mirrorless, action cameras', NULL),
+(8, 'Gaming', 'Gaming consoles and accessories', NULL),
+(9, 'Computer Accessories', 'Keyboards, mice, and peripherals', NULL),
+(10, 'Smart Home', 'Home automation devices', NULL);
+
+-- Products
+INSERT INTO product (ProductID, ProductName, Description, Brand, Base_price, CategoryID, SKU) VALUES
+(1, 'iPhone 15', 'Latest Apple iPhone', 'Apple', 350000.00, 1, 'MOB001'),
+(2, 'Samsung Galaxy S23', 'Flagship Samsung smartphone', 'Samsung', 250000.00, 1, 'MOB002'),
+(3, 'OnePlus 12', 'High-performance OnePlus phone', 'OnePlus', 220000.00, 1, 'MOB003'),
+(4, 'MacBook Pro 16"', 'Apple laptop for professionals', 'Apple', 600000.00, 2, 'LAP001'),
+(5, 'Dell XPS 15', 'Dell high-end laptop', 'Dell', 500000.00, 2, 'LAP002'),
+(6, 'HP Spectre x360', 'Convertible laptop', 'HP', 450000.00, 2, 'LAP003'),
+(7, 'iPad Pro 12.9"', 'High-end Apple tablet', 'Apple', 320000.00, 3, 'TAB001'),
+(8, 'Samsung Galaxy Tab S9', 'Samsung flagship tablet', 'Samsung', 250000.00, 3, 'TAB002'),
+(9, 'Apple Watch Series 9', 'Smartwatch with health tracking', 'Apple', 90000.00, 4, 'WEA001'),
+(10, 'Fitbit Charge 6', 'Fitness tracker', 'Fitbit', 40000.00, 4, 'WEA002'),
+(11, 'LG OLED 55"', '4K OLED Smart TV', 'LG', 350000.00, 5, 'TV001'),
+(12, 'Samsung QLED 65"', 'High-end QLED TV', 'Samsung', 450000.00, 5, 'TV002'),
+(13, 'Sony Bravia 50"', 'Smart LED TV', 'Sony', 300000.00, 5, 'TV003'),
+(14, 'Bose QuietComfort 45', 'Noise-cancelling headphones', 'Bose', 80000.00, 6, 'AUD001'),
+(15, 'Sony WH-1000XM5', 'High-end wireless headphones', 'Sony', 90000.00, 6, 'AUD002'),
+(16, 'JBL Flip 6', 'Portable Bluetooth speaker', 'JBL', 25000.00, 6, 'AUD003'),
+(17, 'Canon EOS R6', 'Mirrorless camera', 'Canon', 500000.00, 7, 'CAM001'),
+(18, 'Nikon Z6 II', 'Full-frame mirrorless camera', 'Nikon', 480000.00, 7, 'CAM002'),
+(19, 'GoPro Hero 12', 'Action camera', 'GoPro', 180000.00, 7, 'CAM003'),
+(20, 'PlayStation 5', 'Latest Sony gaming console', 'Sony', 350000.00, 8, 'GAM001'),
+(21, 'Xbox Series X', 'Microsoft gaming console', 'Microsoft', 340000.00, 8, 'GAM002'),
+(22, 'Nintendo Switch OLED', 'Portable Nintendo console', 'Nintendo', 250000.00, 8, 'GAM003'),
+(23, 'Logitech MX Master 3', 'Wireless mouse', 'Logitech', 25000.00, 9, 'ACC001'),
+(24, 'Razer BlackWidow V3', 'Mechanical gaming keyboard', 'Razer', 35000.00, 9, 'ACC002'),
+(25, 'TP-Link Archer AX50', 'WiFi 6 Router', 'TP-Link', 30000.00, 9, 'ACC003'),
+(26, 'Philips Hue Starter Kit', 'Smart lighting system', 'Philips', 45000.00, 10, 'SMH001'),
+(27, 'Amazon Echo Dot 5th Gen', 'Smart speaker with Alexa', 'Amazon', 25000.00, 10, 'SMH002'),
+(28, 'Google Nest Thermostat', 'Smart thermostat for home', 'Google', 60000.00, 10, 'SMH003'),
+(29, 'Samsung Galaxy Buds 3', 'Wireless earbuds', 'Samsung', 25000.00, 6, 'AUD004'),
+(30, 'Apple AirPods Pro 2', 'Noise-cancelling earbuds', 'Apple', 40000.00, 6, 'AUD005'),
+(31, 'Asus ROG Zephyrus G14', 'Gaming laptop', 'Asus', 450000.00, 2, 'LAP004'),
+(32, 'Microsoft Surface Pro 9', '2-in-1 tablet laptop', 'Microsoft', 320000.00, 3, 'TAB003'),
+(33, 'Fitbit Versa 4', 'Smart fitness watch', 'Fitbit', 35000.00, 4, 'WEA003'),
+(34, 'Samsung The Frame 50"', 'Art-inspired TV', 'Samsung', 400000.00, 5, 'TV004'),
+(35, 'Sony SRS-XB33', 'Portable speaker', 'Sony', 20000.00, 6, 'AUD006'),
+(36, 'Canon EOS 90D', 'DSLR camera', 'Canon', 400000.00, 7, 'CAM004'),
+(37, 'Razer DeathAdder V2', 'Gaming mouse', 'Razer', 20000.00, 9, 'ACC004'),
+(38, 'Logitech G915', 'Wireless mechanical keyboard', 'Logitech', 45000.00, 9, 'ACC005'),
+(39, 'Nest Cam IQ', 'Smart security camera', 'Google', 80000.00, 10, 'SMH004'),
+(40, 'Sonos One SL', 'Smart speaker', 'Sonos', 50000.00, 10, 'SMH005'),
+(41, 'Apple iMac 24"', 'All-in-one desktop', 'Apple', 500000.00, 2, 'LAP005'),
+(42, 'Dell Alienware M15', 'Gaming laptop', 'Dell', 550000.00, 2, 'LAP006'),
+(43, 'Samsung Galaxy Tab A8', 'Affordable tablet', 'Samsung', 120000.00, 3, 'TAB004'),
+(44, 'JBL PartyBox 310', 'Bluetooth party speaker', 'JBL', 75000.00, 6, 'AUD007'),
+(45, 'Xbox Wireless Controller', 'Controller for Xbox', 'Microsoft', 20000.00, 8, 'GAM004');
+
+-- Variants
+INSERT INTO Variant (ProductID, Colour, Size, Model, Variant_Price, StockQuantity, RecorderLevel, Status) VALUES
+-- iPhone 15
+(1, 'Silver', '128GB', 'IP15-SIL', 350000.00, 50, 5, 'Available'),
+(1, 'Gold', '256GB', 'IP15-GLD', 380000.00, 30, 5, 'Available'),
+(1, 'Black', '512GB', 'IP15-BLK', 420000.00, 20, 5, 'Available'),
+
+-- Samsung Galaxy S23
+(2, 'Phantom Black', '128GB', 'S23-BLK', 250000.00, 60, 5, 'Available'),
+(2, 'Cream White', '256GB', 'S23-WHT', 270000.00, 40, 5, 'Available'),
+
+-- OnePlus 12
+(3, 'Blue', '128GB', 'OP12-BLU', 220000.00, 70, 5, 'Available'),
+(3, 'Black', '256GB', 'OP12-BLK', 240000.00, 50, 5, 'Available'),
+
+-- MacBook Pro 16"
+(4, 'Silver', '16GB RAM', 'MBP16-S', 600000.00, 20, 2, 'Available'),
+(4, 'Space Gray', '32GB RAM', 'MBP16-GR', 650000.00, 15, 2, 'Available'),
+
+-- Dell XPS 15
+(5, 'Silver', '16GB RAM', 'XPS15-S', 500000.00, 25, 2, 'Available'),
+(5, 'Black', '32GB RAM', 'XPS15-B', 550000.00, 20, 2, 'Available'),
+
+-- HP Spectre x360
+(6, 'Silver', '16GB RAM', 'HPSX360-S', 450000.00, 30, 2, 'Available'),
+
+-- iPad Pro 12.9"
+(7, 'Silver', '128GB', 'IPADPRO12-S', 320000.00, 35, 2, 'Available'),
+(7, 'Space Gray', '256GB', 'IPADPRO12-GR', 350000.00, 20, 2, 'Available'),
+
+-- Samsung Galaxy Tab S9
+(8, 'Black', '128GB', 'TAB-S9-BLK', 250000.00, 40, 2, 'Available'),
+
+-- Apple Watch Series 9
+(9, 'Silver', '40mm', 'AW9-S', 90000.00, 50, 5, 'Available'),
+(9, 'Gold', '44mm', 'AW9-G', 95000.00, 30, 5, 'Available'),
+
+-- Fitbit Charge 6
+(10, 'Black', 'Standard', 'FC6-BLK', 40000.00, 60, 5, 'Available'),
+
+-- LG OLED 55"
+(11, 'Black', '55"', 'OLED55-B', 350000.00, 10, 2, 'Available'),
+
+-- Samsung QLED 65"
+(12, 'Black', '65"', 'QLED65-B', 450000.00, 8, 2, 'Available'),
+
+-- Bose QuietComfort 45
+(14, 'Black', 'Standard', 'BQC45-B', 80000.00, 25, 5, 'Available'),
+
+-- Sony WH-1000XM5
+(15, 'Silver', 'Standard', 'WHXM5-S', 90000.00, 20, 5, 'Available'),
+
+-- JBL Flip 6
+(16, 'Red', 'Standard', 'JBLF6-R', 25000.00, 50, 5, 'Available'),
+
+-- Canon EOS R6
+(17, 'Black', 'Body Only', 'EOSR6-B', 500000.00, 15, 2, 'Available'),
+
+-- Nikon Z6 II
+(18, 'Black', 'Body Only', 'Z6II-B', 480000.00, 12, 2, 'Available'),
+
+-- GoPro Hero 12
+(19, 'Black', 'Standard', 'GPH12-B', 180000.00, 30, 5, 'Available'),
+
+-- PlayStation 5
+(20, 'White', 'Standard', 'PS5-W', 350000.00, 40, 5, 'Available'),
+
+-- Xbox Series X
+(21, 'Black', 'Standard', 'XBOXSX-B', 340000.00, 35, 5, 'Available'),
+
+-- Nintendo Switch OLED
+(22, 'Red/Blue', 'Standard', 'NS-OLED-RB', 250000.00, 30, 5, 'Available'),
+
+-- Logitech MX Master 3
+(23, 'Black', 'Standard', 'MX3-B', 25000.00, 80, 10, 'Available'),
+
+-- Razer BlackWidow V3
+(24, 'Black', 'Full Size', 'BWV3-B', 35000.00, 50, 5, 'Available'),
+
+-- TP-Link Archer AX50
+(25, 'White', 'Standard', 'AX50-W', 30000.00, 60, 5, 'Available'),
+
+-- Philips Hue Starter Kit
+(26, 'White', '4 bulbs', 'HUE-4W', 45000.00, 40, 5, 'Available'),
+
+-- Amazon Echo Dot 5th Gen
+(27, 'Charcoal', 'Standard', 'ECHO5-C', 25000.00, 50, 5, 'Available'),
+
+-- Google Nest Thermostat
+(28, 'White', 'Standard', 'NEST-W', 60000.00, 30, 5, 'Available');

@@ -1,0 +1,144 @@
+DELIMITER $$
+
+CREATE FUNCTION get_estimated_delivery(
+    variant_id INT,
+    city_type VARCHAR(20)
+)
+RETURNS INT
+DETERMINISTIC
+BEGIN
+    DECLARE delivery_days INT;
+    DECLARE stock_qty INT;
+
+    -- Base delivery days based on city
+    IF city_type = 'Main' THEN
+        SET delivery_days = 5;
+    ELSE
+        SET delivery_days = 7;
+    END IF;
+
+    -- Check variant availability
+    SELECT StockQuantity INTO stock_qty 
+    FROM Variant 
+    WHERE VariantID = variant_id;
+
+    IF stock_qty <= 0 THEN
+        SET delivery_days = delivery_days + 3;
+    END IF;
+
+    RETURN delivery_days;
+END$$
+
+
+-- Calculate total price of an order item
+CREATE FUNCTION calculate_item_total(
+    quantity INT,
+    variant_price DECIMAL(10,2)
+)
+RETURNS DECIMAL(10,2)
+DETERMINISTIC
+BEGIN
+    RETURN quantity * variant_price;
+END$$
+
+
+-- Check stock availability for a variant
+CREATE FUNCTION is_variant_available(
+    variant_id INT
+)
+RETURNS BOOLEAN
+DETERMINISTIC
+BEGIN
+    DECLARE qty INT;
+
+    SELECT StockQuantity 
+    INTO qty 
+    FROM Variant 
+    WHERE VariantID = variant_id;
+
+    RETURN qty > 0;
+END$$
+
+
+-- Category-wise order count
+CREATE FUNCTION get_category_orders(
+    cat_id INT
+)
+RETURNS INT
+DETERMINISTIC
+BEGIN
+    DECLARE total INT;
+
+    SELECT COUNT(*) 
+    INTO total
+    FROM OrderItems oi
+    JOIN Variant v ON oi.VariantID = v.VariantID
+    JOIN Product p ON v.ProductID = p.ProductID
+    WHERE p.CategoryID = cat_id;
+
+    RETURN total;
+END$$
+
+
+-- Outputs total sales, total orders per each quarter of input year
+CREATE FUNCTION get_quarterly_sales_report(year_input INT)
+RETURNS TABLE (
+    QuarterName VARCHAR(10),
+    TotalSales DECIMAL(10,2),
+    TotalOrders INT
+)
+BEGIN
+    RETURN
+    SELECT 
+        CONCAT('Q', QUARTER(OrderDate)) AS QuarterName,
+        SUM(TotalAmount) AS TotalSales,
+        COUNT(OrderID) AS TotalOrders
+    FROM Orders
+    WHERE YEAR(OrderDate) = year_input
+    GROUP BY QUARTER(OrderDate)
+    ORDER BY QUARTER(OrderDate);
+END$$
+
+
+-- Returns top product name. Input example ('2025-01-01', '2025-03-31')
+CREATE FUNCTION get_top_selling_product(
+    start_date DATE,
+    end_date DATE
+)
+RETURNS VARCHAR(255)
+DETERMINISTIC
+BEGIN
+    DECLARE top_product VARCHAR(255);
+
+    SELECT p.ProductName
+    INTO top_product
+    FROM Orders o
+    JOIN OrderItems oi ON o.OrderID = oi.OrderID
+    JOIN Variant v ON oi.VariantID = v.VariantID
+    JOIN Product p ON v.ProductID = p.ProductID
+    WHERE o.OrderDate BETWEEN start_date AND end_date
+    GROUP BY p.ProductID, p.ProductName
+    ORDER BY SUM(oi.Quantity) DESC
+    LIMIT 1;
+
+    RETURN top_product;
+END$$
+
+
+-- Order summary of customers
+CREATE FUNCTION get_customer_total_spent(customer_id INT)
+RETURNS DECIMAL(10,2)
+DETERMINISTIC
+BEGIN
+    DECLARE total DECIMAL(10,2);
+
+    SELECT IFNULL(SUM(TotalAmount), 0)
+    INTO total
+    FROM Orders
+    WHERE CustomerID = customer_id;
+
+    RETURN total;
+END$$
+
+
+DELIMITER ;

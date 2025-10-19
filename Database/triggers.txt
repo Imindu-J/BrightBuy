@@ -1,0 +1,49 @@
+DELIMITER $$
+
+-- Update stock after order placement
+CREATE TRIGGER decrement_stock_after_order
+AFTER INSERT ON OrderItems
+FOR EACH ROW
+BEGIN
+    UPDATE Variant
+    SET StockQuantity = StockQuantity - NEW.Quantity
+    WHERE VariantID = NEW.VariantID;
+END$$
+
+-- Prevent negative stock
+CREATE TRIGGER prevent_negative_stock
+BEFORE UPDATE ON Variant
+FOR EACH ROW
+BEGIN
+    IF NEW.StockQuantity < 0 THEN
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'Stock cannot be negative';
+    END IF;
+END$$
+
+-- Auto-calculate order total
+CREATE TRIGGER calculate_order_total
+BEFORE INSERT ON Orders
+FOR EACH ROW
+BEGIN
+    DECLARE total DECIMAL(10,2);
+
+    SELECT SUM(oi.Quantity * v.Variant_Price)
+    INTO total
+    FROM OrderItems oi
+    JOIN Variant v ON oi.VariantID = v.VariantID
+    WHERE oi.OrderID = NEW.OrderID;
+
+    SET NEW.TotalAmount = IFNULL(total, 0);
+END$$
+
+-- Audit log for order insertions
+CREATE TRIGGER audit_order_changes
+AFTER INSERT ON Orders
+FOR EACH ROW
+BEGIN
+    INSERT INTO OrderAudit (OrderID, Action, ActionTime)
+    VALUES (NEW.OrderID, 'INSERT', NOW());
+END$$
+
+DELIMITER ;
