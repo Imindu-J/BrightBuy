@@ -5,13 +5,6 @@ function authorize(roles = []) {
     const authHeader = req.headers['authorization'];
     const token = authHeader?.split(' ')[1];
     
-    console.log('Auth middleware:', { 
-      hasAuthHeader: !!authHeader, 
-      hasToken: !!token, 
-      roles, 
-      path: req.path 
-    });
-    
     if (!token) return res.status(401).json({ error: 'No token provided' });
 
     jwt.verify(token, process.env.JWT_SECRET, (err, user) => {
@@ -19,8 +12,6 @@ function authorize(roles = []) {
         console.error('JWT verification error:', err.message);
         return res.status(403).json({ error: 'Invalid or expired token' });
       }
-
-      console.log('JWT verified user:', user);
 
       // Check role (handle both lowercase and uppercase)
       const userRole = user.role || user.Role;
