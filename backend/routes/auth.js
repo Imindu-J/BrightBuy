@@ -3,7 +3,7 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const db = require('../utils/db');
 
-// Register new user
+// Register new user (customer only - staff/admin created by admin)
 router.post('/register', async (req, res) => {
     const { username, email, password, phone, address } = req.body;
     const hashedPassword = await bcrypt.hash(password, 10);
@@ -14,8 +14,11 @@ router.post('/register', async (req, res) => {
             VALUES (?, ?, ?, ?, ?, 'customer')`,
             [username, email, hashedPassword, phone, address]
         );
-        res.json({ message: 'User registered successfully', userId: result.insertId });
+        res.json({ message: 'Customer registered successfully', userId: result.insertId });
     } catch (err) {
+        if (err.code === 'ER_DUP_ENTRY') {
+            return res.status(400).json({ error: 'User with this email already exists' });
+        }
         res.status(500).json({ error: err.message });
     }
 });
