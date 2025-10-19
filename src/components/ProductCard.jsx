@@ -1,12 +1,15 @@
 import React from 'react';
+import { getImageUrl, handleImageError, handleImageLoad } from '../utils/imageUtils';
 
 const ProductCard = ({ product, onView, onAddToCart, selectedVariant, setSelectedVariant, productVariants, currentPrice }) => (
   <div className="bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-500 transform hover:-translate-y-2 overflow-hidden group">
     <div className="relative overflow-hidden">
       <img
-        src={`http://localhost:5000${product.ImageURL}`}
+        src={getImageUrl(product.ImageURL)}
         alt={product.ProductName}
         className="w-full h-64 object-cover group-hover:scale-110 transition-transform duration-500"
+        onError={(e) => handleImageError(e, product.ImageURL)}
+        onLoad={() => handleImageLoad(product.ImageURL)}
       />
       <div className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
         <button className="p-2 bg-white rounded-full shadow-lg hover:bg-red-50">

@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Plus, Edit, Trash2, Search, AlertTriangle, X, Upload } from 'lucide-react';
+import { getImageUrl, handleImageError, handleImageLoad } from '../../utils/imageUtils';
 
 const ProductManagement = ({ products, categories, fetchProducts }) => {
   const [searchTerm, setSearchTerm] = useState('');
@@ -171,9 +172,11 @@ const ProductManagement = ({ products, categories, fetchProducts }) => {
                   <td className="px-6 py-4">
                     <div className="flex items-center space-x-3">
                       <img
-                        src={`http://localhost:5000${product.ImageURL}`}
+                        src={getImageUrl(product.ImageURL)}
                         alt={product.ProductName}
                         className="w-12 h-12 object-cover rounded-lg"
+                        onError={(e) => handleImageError(e, product.ImageURL)}
+                        onLoad={() => handleImageLoad(product.ImageURL)}
                       />
                       <span className="font-medium text-gray-800">{product.ProductName}</span>
                     </div>

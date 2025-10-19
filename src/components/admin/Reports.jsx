@@ -1,5 +1,6 @@
 import React from 'react';
 import { TrendingUp, ShoppingCart, Package, AlertTriangle } from 'lucide-react';
+import { getImageUrl, handleImageError, handleImageLoad } from '../../utils/imageUtils';
 
 const Reports = ({ products, orders }) => {
   const totalSales = orders.reduce((sum, o) => sum + (o.TotalAmount || 0), 0);
@@ -67,9 +68,11 @@ const Reports = ({ products, orders }) => {
                   <div className="flex items-center space-x-3">
                     <span className="font-bold text-gray-400">#{idx + 1}</span>
                     <img
-                      src={`http://localhost:5000${product.ImageURL}`}
+                      src={getImageUrl(product.ImageURL)}
                       alt={product.ProductName}
                       className="w-10 h-10 object-cover rounded"
+                      onError={(e) => handleImageError(e, product.ImageURL)}
+                      onLoad={() => handleImageLoad(product.ImageURL)}
                     />
                     <div>
                       <p className="font-medium text-gray-800">{product.ProductName}</p>

@@ -1,4 +1,5 @@
 import React from 'react';
+import { getImageUrl, handleImageError, handleImageLoad } from '../utils/imageUtils';
 
 const ProductModal = ({ selectedProduct, setSelectedProduct, addToCart, selectedVariant, setSelectedVariant, productVariants, currentPrice }) => {
   if (!selectedProduct) return null;
@@ -20,9 +21,11 @@ const ProductModal = ({ selectedProduct, setSelectedProduct, addToCart, selected
           <div className="grid md:grid-cols-2 gap-8">
             <div>
               <img
-                src={`http://localhost:5000${selectedProduct.ImageURL}`}
+                src={getImageUrl(selectedProduct.ImageURL)}
                 alt={selectedProduct.ProductName}
                 className="w-full h-96 object-cover rounded-xl shadow-lg"
+                onError={(e) => handleImageError(e, selectedProduct.ImageURL)}
+                onLoad={() => handleImageLoad(selectedProduct.ImageURL)}
               />
             </div>
             <div className="space-y-6">
