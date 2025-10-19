@@ -7,8 +7,8 @@ const authorize = require('./middleware/auth');
 
 // Set default JWT secret if not provided
 if (!process.env.JWT_SECRET) {
-  process.env.JWT_SECRET = JWT_SECRET //'your_default_jwt_secret_key_here';
-  console.log('Warning: Using default JWT secret.');
+  process.env.JWT_SECRET = 'your_default_jwt_secret_key_here';
+  console.log('Warning: Using default JWT secret. Please set JWT_SECRET in environment variables for production.');
 }
 
 const app = express();
