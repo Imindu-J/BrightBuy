@@ -41,16 +41,44 @@ const HeaderComponent = ({ cartItems, setShowCart, currentUser, setCurrentPage, 
               </span>
             )}
           </button>
-          <button 
-            onClick={() => currentUser ? setCurrentPage('profile') : setShowLogin(true)}
-            className="flex items-center space-x-2 p-2 bg-white/20 rounded-full hover:bg-white/30 transition-all duration-300"
-          >
-            {/* User icon here if needed */}
-            <span>👤</span>
-            <span className="hidden sm:block">
-              {currentUser ? currentUser.UserName : 'Login'}
-            </span>
-          </button>
+          {currentUser ? (
+            <div className="flex items-center space-x-2">
+              {/* Role-based navigation */}
+              {currentUser.Role === 'admin' && (
+                <button 
+                  onClick={() => setCurrentPage('admin')}
+                  className="flex items-center space-x-1 px-3 py-2 bg-white/20 rounded-lg hover:bg-white/30 transition-all duration-300"
+                >
+                  <span>⚙️</span>
+                  <span className="hidden sm:block">Admin</span>
+                </button>
+              )}
+              {currentUser.Role === 'staff' && (
+                <button 
+                  onClick={() => setCurrentPage('staff')}
+                  className="flex items-center space-x-1 px-3 py-2 bg-white/20 rounded-lg hover:bg-white/30 transition-all duration-300"
+                >
+                  <span>👷</span>
+                  <span className="hidden sm:block">Staff</span>
+                </button>
+              )}
+              <button 
+                onClick={() => setCurrentPage('profile')}
+                className="flex items-center space-x-2 p-2 bg-white/20 rounded-full hover:bg-white/30 transition-all duration-300"
+              >
+                <span>👤</span>
+                <span className="hidden sm:block">{currentUser.UserName}</span>
+              </button>
+            </div>
+          ) : (
+            <button 
+              onClick={() => setShowLogin(true)}
+              className="flex items-center space-x-2 p-2 bg-white/20 rounded-full hover:bg-white/30 transition-all duration-300"
+            >
+              <span>👤</span>
+              <span className="hidden sm:block">Login</span>
+            </button>
+          )}
         </div>
       </div>
       {/* Mobile search */}

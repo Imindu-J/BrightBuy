@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import axios from 'axios';
 import { EyeIcon, EyeSlashIcon } from '@heroicons/react/24/outline'; // install heroicons
 
-const SignupModalClean = ({ onClose }) => {
+const SignupModalClean = ({ onClose, onSignup }) => {
   const [userData, setUserData] = useState({
     UserName: '',
     Email: '',
@@ -33,8 +33,20 @@ const SignupModalClean = ({ onClose }) => {
 
       const res = await axios.post('http://localhost:5000/auth/register', payload);
 
-      alert(res.data.message || 'User registered successfully');
+      alert(res.data.message || 'Customer registered successfully');
       onClose();
+      
+      // If onSignup callback is provided, call it
+      if (onSignup) {
+        onSignup({
+          UserID: res.data.userId,
+          UserName: userData.UserName,
+          Email: userData.Email,
+          PhoneNumber: userData.PhoneNumber,
+          User_Address: userData.User_Address,
+          Role: 'customer'
+        });
+      }
     } catch (err) {
       console.error(err);
       alert(err.response?.data?.error || 'Registration failed. Try again.');

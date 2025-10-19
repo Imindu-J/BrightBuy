@@ -8,6 +8,8 @@ import ProductModal from './components/ProductModal';
 import ProfilePage from './components/ProfilePage';
 import HomePage from './components/HomePage';
 import SignupModalClean from './components/SignupModalClean';
+import AdminDashboard from './components/AdminDashboard';
+import StaffDashboard from './components/StaffDashboard';
 
 const BrightBuyEcommerce = () => {
   // State
@@ -50,6 +52,32 @@ const BrightBuyEcommerce = () => {
       .then(res => res.json())
       .then(data => setVariants(data))
       .catch(err => console.error('Failed to fetch variants', err));
+  }, []);
+
+  // Check for existing session on page load
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+    if (token) {
+      fetch('http://localhost:5000/auth/verify', {
+        headers: { Authorization: `Bearer ${token}` }
+      })
+      .then(res => res.json())
+      .then(data => {
+        if (data.user) {
+          setCurrentUser(data.user);
+          // Set appropriate page based on role
+          if (data.user.Role === 'admin') {
+            setCurrentPage('admin');
+          } else if (data.user.Role === 'staff') {
+            setCurrentPage('staff');
+          }
+        }
+      })
+      .catch(err => {
+        console.error('Session verification failed:', err);
+        localStorage.removeItem('token');
+      });
+    }
   }, []);
 
   // Helper functions
@@ -139,6 +167,15 @@ const BrightBuyEcommerce = () => {
         localStorage.setItem('token', data.token);
         setCurrentUser(data.user);
         setShowLogin(false);
+        
+        // Role-based navigation after login
+        if (data.user.Role === 'admin') {
+          setCurrentPage('admin');
+        } else if (data.user.Role === 'staff') {
+          setCurrentPage('staff');
+        } else {
+          setCurrentPage('home');
+        }
       } else {
         alert(data.error || 'Login failed');
       }
@@ -148,14 +185,6 @@ const BrightBuyEcommerce = () => {
     }
   };
 
-  const handleSignup = (userData) => {
-    setCurrentUser({
-      UserID: Date.now(),
-      ...userData,
-      Role: 'Customer'
-    });
-    setShowSignup(false);
-  };
 
   const handleCheckout = () => {
     if (!currentUser) {
@@ -225,6 +254,22 @@ const BrightBuyEcommerce = () => {
         />
       )}
 
+      {currentPage === 'admin' && currentUser?.Role === 'admin' && (
+        <AdminDashboard
+          currentUser={currentUser}
+          setCurrentUser={setCurrentUser}
+          setCurrentPage={setCurrentPage}
+        />
+      )}
+
+      {currentPage === 'staff' && currentUser?.Role === 'staff' && (
+        <StaffDashboard
+          currentUser={currentUser}
+          setCurrentUser={setCurrentUser}
+          setCurrentPage={setCurrentPage}
+        />
+      )}
+
       {showCart && (
         <CartModal
           cartItems={cartItems}
@@ -259,7 +304,11 @@ const BrightBuyEcommerce = () => {
       {showSignup && (
         <SignupModalClean
           onClose={() => setShowSignup(false)}
-          onSignup={handleSignup}
+          onSignup={(userData) => {
+            setCurrentUser(userData);
+            setShowSignup(false);
+            setCurrentPage('home');
+          }}
         />
       )}
 

@@ -4,7 +4,16 @@ import { Search, X } from 'lucide-react';
 const UserManagement = ({ users, fetchUsers }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [showModal, setShowModal] = useState(false);
+  const [showCreateModal, setShowCreateModal] = useState(false);
   const [selectedUser, setSelectedUser] = useState(null);
+  const [newUser, setNewUser] = useState({
+    username: '',
+    email: '',
+    password: '',
+    role: 'staff',
+    phone: '',
+    address: ''
+  });
 
   const handleRoleChange = async (userId, newRole) => {
     try {
@@ -37,7 +46,7 @@ const UserManagement = ({ users, fetchUsers }) => {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${token}`
         },
-        body: JSON.stringify({ status: newStatus })
+        body: JSON.stringify({ isActive: newStatus === 'active' })
       });
       if (res.ok) {
         alert('User status updated successfully!');
@@ -49,6 +58,41 @@ const UserManagement = ({ users, fetchUsers }) => {
     }
   };
 
+  const handleCreateUser = async (e) => {
+    e.preventDefault();
+    try {
+      const token = localStorage.getItem('token');
+      const res = await fetch('http://localhost:5000/admin/create-user', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`
+        },
+        body: JSON.stringify(newUser)
+      });
+      
+      if (res.ok) {
+        alert('User created successfully!');
+        setShowCreateModal(false);
+        setNewUser({
+          username: '',
+          email: '',
+          password: '',
+          role: 'staff',
+          phone: '',
+          address: ''
+        });
+        fetchUsers();
+      } else {
+        const error = await res.json();
+        alert(error.error || 'Failed to create user');
+      }
+    } catch (err) {
+      console.error('Error creating user:', err);
+      alert('Failed to create user');
+    }
+  };
+
   const filteredUsers = users.filter(u =>
     u.UserName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
     u.Email?.toLowerCase().includes(searchTerm.toLowerCase())
@@ -56,15 +100,23 @@ const UserManagement = ({ users, fetchUsers }) => {
 
   return (
     <div className="space-y-6">
-      <div className="relative max-w-md">
-        <Search className="absolute left-3 top-3 text-gray-400" size={20} />
-        <input
-          type="text"
-          placeholder="Search users..."
-          className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-        />
+      <div className="flex justify-between items-center">
+        <div className="relative max-w-md">
+          <Search className="absolute left-3 top-3 text-gray-400" size={20} />
+          <input
+            type="text"
+            placeholder="Search users..."
+            className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
+        </div>
+        <button
+          onClick={() => setShowCreateModal(true)}
+          className="bg-gradient-to-r from-blue-500 to-purple-500 text-white px-4 py-2 rounded-lg hover:shadow-lg transition-all duration-300"
+        >
+          Create User
+        </button>
       </div>
 
       <div className="bg-white rounded-xl shadow-lg overflow-hidden">
@@ -106,14 +158,14 @@ const UserManagement = ({ users, fetchUsers }) => {
                   </td>
                   <td className="px-6 py-4">
                     <button
-                      onClick={() => handleStatusToggle(user.UserID, user.Status)}
+                      onClick={() => handleStatusToggle(user.UserID, user.isActive ? 'active' : 'inactive')}
                       className={`px-3 py-1 rounded-full text-xs font-medium ${
-                        user.Status === 'active' 
+                        user.isActive 
                           ? 'bg-green-100 text-green-800' 
                           : 'bg-red-100 text-red-800'
                       }`}
                     >
-                      {user.Status || 'active'}
+                      {user.isActive ? 'Active' : 'Inactive'}
                     </button>
                   </td>
                   <td className="px-6 py-4">
@@ -181,6 +233,89 @@ const UserManagement = ({ users, fetchUsers }) => {
                 <p className="text-gray-900">{selectedUser.User_Address || 'Not provided'}</p>
               </div>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Create User Modal */}
+      {showCreateModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl w-full max-w-md">
+            <div className="bg-gradient-to-r from-blue-500 to-purple-500 text-white p-6">
+              <div className="flex justify-between items-center">
+                <h2 className="text-2xl font-bold">Create New User</h2>
+                <button onClick={() => setShowCreateModal(false)} className="hover:bg-white/20 p-2 rounded-full">
+                  <X size={24} />
+                </button>
+              </div>
+            </div>
+            <form onSubmit={handleCreateUser} className="p-6 space-y-4">
+              <div>
+                <label className="block text-gray-700 font-medium mb-2">Username</label>
+                <input
+                  type="text"
+                  value={newUser.username}
+                  onChange={(e) => setNewUser({...newUser, username: e.target.value})}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                  required
+                />
+              </div>
+              <div>
+                <label className="block text-gray-700 font-medium mb-2">Email</label>
+                <input
+                  type="email"
+                  value={newUser.email}
+                  onChange={(e) => setNewUser({...newUser, email: e.target.value})}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                  required
+                />
+              </div>
+              <div>
+                <label className="block text-gray-700 font-medium mb-2">Password</label>
+                <input
+                  type="password"
+                  value={newUser.password}
+                  onChange={(e) => setNewUser({...newUser, password: e.target.value})}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                  required
+                />
+              </div>
+              <div>
+                <label className="block text-gray-700 font-medium mb-2">Role</label>
+                <select
+                  value={newUser.role}
+                  onChange={(e) => setNewUser({...newUser, role: e.target.value})}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                >
+                  <option value="staff">Staff</option>
+                  <option value="admin">Admin</option>
+                </select>
+              </div>
+              <div>
+                <label className="block text-gray-700 font-medium mb-2">Phone</label>
+                <input
+                  type="text"
+                  value={newUser.phone}
+                  onChange={(e) => setNewUser({...newUser, phone: e.target.value})}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+              <div>
+                <label className="block text-gray-700 font-medium mb-2">Address</label>
+                <textarea
+                  value={newUser.address}
+                  onChange={(e) => setNewUser({...newUser, address: e.target.value})}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                  rows="3"
+                />
+              </div>
+              <button
+                type="submit"
+                className="w-full bg-gradient-to-r from-blue-500 to-purple-500 text-white font-bold py-3 px-6 rounded-lg hover:shadow-lg transition-all duration-300"
+              >
+                Create User
+              </button>
+            </form>
           </div>
         </div>
       )}

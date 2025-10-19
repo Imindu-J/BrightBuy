@@ -100,6 +100,7 @@ const ProfilePage = ({ currentUser, orderHistory, setCurrentPage, setCurrentUser
             </button>
             <button
               onClick={() => {
+                localStorage.removeItem('token');
                 setCurrentUser(null);
                 setCurrentPage('home');
               }}
