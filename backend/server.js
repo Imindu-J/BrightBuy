@@ -5,6 +5,12 @@ require('dotenv').config();
 const pool = require('./utils/db');
 const authorize = require('./middleware/auth');
 
+// Set default JWT secret if not provided
+if (!process.env.JWT_SECRET) {
+  process.env.JWT_SECRET = JWT_SECRET //'your_default_jwt_secret_key_here';
+  console.log('Warning: Using default JWT secret.');
+}
+
 const app = express();
 app.use(cors());
 app.use(express.json());
@@ -13,13 +19,14 @@ app.use(express.json());
 app.use('/images', express.static('public/images'));
 
 // Test DB connection at startup
-// Test connection on startup
 (async () => {
   try {
     const [rows] = await pool.query('SELECT 1 AS test');
     console.log('Database connected! Test query returned:', rows[0].test);
   } catch (err) {
     console.error('Database connection failed:', err.message);
+    console.error('Please make sure MySQL is running and the database exists.');
+    console.error('You can create the database by running the schema.sql file.');
     process.exit(1); // Exit if DB cannot connect
   }
 })();
