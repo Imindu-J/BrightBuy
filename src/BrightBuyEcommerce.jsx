@@ -195,6 +195,16 @@ const BrightBuyEcommerce = () => {
         return matchesCategory;
       });
 
+  // Determine if any filters are active
+  const isFiltered = searchTerm.trim() !== '' || selectedCategory !== 'all';
+
+  // Scroll to top when filters are applied
+  useEffect(() => {
+    if (isFiltered) {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  }, [isFiltered]);
+
   const addToCart = async (product) => {
     if (!currentUser) {
       setShowLogin(true);
@@ -361,21 +371,34 @@ const BrightBuyEcommerce = () => {
 
       {currentPage === 'home' && (
         <div>
-          {searchTerm.trim() && (
+          {isFiltered && (
             <div className="bg-blue-50 border-l-4 border-blue-400 p-4 mx-4 mt-4">
-              <div className="flex items-center">
-                <div className="flex-shrink-0">
-                  <span className="text-blue-400">🔍</span>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center">
+                  <div className="flex-shrink-0">
+                    <span className="text-blue-400">🔍</span>
+                  </div>
+                  <div className="ml-3">
+                    <p className="text-sm text-blue-700">
+                      {isSearching ? (
+                        'Searching...'
+                      ) : searchTerm.trim() ? (
+                        `Found ${filteredProducts.length} result${filteredProducts.length !== 1 ? 's' : ''} for "${searchTerm}"`
+                      ) : (
+                        `Showing ${filteredProducts.length} product${filteredProducts.length !== 1 ? 's' : ''} in selected category`
+                      )}
+                    </p>
+                  </div>
                 </div>
-                <div className="ml-3">
-                  <p className="text-sm text-blue-700">
-                    {isSearching ? (
-                      'Searching...'
-                    ) : (
-                      `Found ${filteredProducts.length} result${filteredProducts.length !== 1 ? 's' : ''} for "${searchTerm}"`
-                    )}
-                  </p>
-                </div>
+                <button
+                  onClick={() => {
+                    setSearchTerm('');
+                    setSelectedCategory('all');
+                  }}
+                  className="text-blue-600 hover:text-blue-800 text-sm font-medium underline"
+                >
+                  Clear Filters
+                </button>
               </div>
             </div>
           )}
@@ -385,6 +408,9 @@ const BrightBuyEcommerce = () => {
             filteredProducts={filteredProducts}
             ProductCard={ProductCard}
             productCardProps={productCardProps}
+            selectedCategory={selectedCategory}
+            searchTerm={searchTerm}
+            isFiltered={isFiltered}
           />
         </div>
       )}
