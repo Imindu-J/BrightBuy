@@ -111,7 +111,7 @@ const ProductCard = ({ product, onView, onAddToCart, selectedVariant, setSelecte
             onClick={() => onAddToCart(product)}
             className="w-full bg-gradient-to-r from-blue-500 to-purple-500 text-white px-4 py-2.5 rounded-lg hover:shadow-lg transform hover:scale-105 transition-all duration-300 flex items-center justify-center space-x-2 font-medium"
           >
-            <span className="text-lg">＋</span>
+            <span className="text-lg">➕</span>
             <span>Add to Cart</span>
           </button>
         </div>
