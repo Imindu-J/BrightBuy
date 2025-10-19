@@ -12,18 +12,17 @@ const StaffInventory = ({ products, fetchProducts }) => {
     try {
       const token = localStorage.getItem('token');
       const newStock = stockUpdate.action === 'add' 
-        ? (selectedProduct.Stock || 0) + parseInt(stockUpdate.quantity)
-        : (selectedProduct.Stock || 0) - parseInt(stockUpdate.quantity);
+        ? selectedProduct.StockQuantity + parseInt(stockUpdate.quantity)
+        : selectedProduct.StockQuantity - parseInt(stockUpdate.quantity);
 
-      const res = await fetch(`http://localhost:5000/staff/products/${selectedProduct.ProductID}/stock`, {
+      const res = await fetch(`http://localhost:5000/staff/inventory/${selectedProduct.VariantID}/stock`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${token}`
         },
         body: JSON.stringify({ 
-          stock: newStock,
-          reason: stockUpdate.reason
+          stockQuantity: newStock
         })
       });
       
@@ -42,7 +41,7 @@ const StaffInventory = ({ products, fetchProducts }) => {
   const handleReportLowStock = async () => {
     try {
       const token = localStorage.getItem('token');
-      const lowStockItems = products.filter(p => (p.Stock || 0) < 10);
+      const lowStockItems = products; // Already filtered by backend
       
       const res = await fetch('http://localhost:5000/staff/report-low-stock', {
         method: 'POST',
@@ -51,7 +50,7 @@ const StaffInventory = ({ products, fetchProducts }) => {
           Authorization: `Bearer ${token}`
         },
         body: JSON.stringify({ 
-          products: lowStockItems.map(p => p.ProductID),
+          variants: lowStockItems.map(p => p.VariantID),
           note: lowStockReport
         })
       });
@@ -71,7 +70,7 @@ const StaffInventory = ({ products, fetchProducts }) => {
     p.Brand?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  const lowStockProducts = products.filter(p => (p.Stock || 0) < 10);
+  const lowStockProducts = products; // Already filtered by backend
 
   return (
     <div className="space-y-6">
@@ -121,39 +120,46 @@ const StaffInventory = ({ products, fetchProducts }) => {
               <tr>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Product</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Brand</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Category</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Price</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Variant</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Stock</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Reorder Level</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-200">
-              {filteredProducts.map(product => (
-                <tr key={product.ProductID} className="hover:bg-gray-50">
+              {filteredProducts.map(variant => (
+                <tr key={variant.VariantID} className="hover:bg-gray-50">
                   <td className="px-6 py-4">
                     <div className="flex items-center space-x-3">
-                      <img
-                        src={`http://localhost:5000${product.ImageURL}`}
-                        alt={product.ProductName}
-                        className="w-12 h-12 object-cover rounded-lg"
-                      />
-                      <span className="font-medium text-gray-800">{product.ProductName}</span>
+                      <div className="w-12 h-12 bg-gradient-to-r from-blue-400 to-purple-500 rounded-lg flex items-center justify-center">
+                        <span className="text-white font-bold text-lg">📦</span>
+                      </div>
+                      <div>
+                        <span className="font-medium text-gray-800">{variant.ProductName}</span>
+                        <p className="text-sm text-gray-500">ID: {variant.ProductID}</p>
+                      </div>
                     </div>
                   </td>
-                  <td className="px-6 py-4 text-gray-600">{product.Brand}</td>
-                  <td className="px-6 py-4 text-gray-600">{product.CategoryID}</td>
-                  <td className="px-6 py-4 text-green-600 font-semibold">LKR {product.Base_price?.toLocaleString()}</td>
+                  <td className="px-6 py-4 text-gray-600">{variant.Brand}</td>
+                  <td className="px-6 py-4">
+                    <div className="flex space-x-1">
+                      {variant.Colour && <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded">{variant.Colour}</span>}
+                      {variant.Size && <span className="text-xs bg-green-100 text-green-800 px-2 py-1 rounded">{variant.Size}</span>}
+                      {variant.Model && <span className="text-xs bg-purple-100 text-purple-800 px-2 py-1 rounded">{variant.Model}</span>}
+                    </div>
+                  </td>
                   <td className="px-6 py-4">
                     <span className={`px-3 py-1 rounded-full text-xs font-medium ${
-                      (product.Stock || 0) < 10 ? 'bg-red-100 text-red-800' : 'bg-green-100 text-green-800'
+                      variant.StockQuantity <= variant.RecorderLevel ? 'bg-red-100 text-red-800' : 'bg-green-100 text-green-800'
                     }`}>
-                      {product.Stock || 0} units
+                      {variant.StockQuantity} units
                     </span>
                   </td>
+                  <td className="px-6 py-4 text-gray-600">{variant.RecorderLevel}</td>
                   <td className="px-6 py-4">
                     <button
                       onClick={() => {
-                        setSelectedProduct(product);
+                        setSelectedProduct(variant);
                         setShowModal(true);
                       }}
                       className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition"
@@ -183,7 +189,14 @@ const StaffInventory = ({ products, fetchProducts }) => {
             <div className="p-6 space-y-4">
               <div>
                 <h3 className="font-semibold text-gray-800 mb-2">{selectedProduct.ProductName}</h3>
-                <p className="text-sm text-gray-600">Current Stock: <span className="font-semibold">{selectedProduct.Stock || 0} units</span></p>
+                <p className="text-sm text-gray-600 mb-2">{selectedProduct.Brand}</p>
+                <div className="flex space-x-2 mb-2">
+                  {selectedProduct.Colour && <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded">{selectedProduct.Colour}</span>}
+                  {selectedProduct.Size && <span className="text-xs bg-green-100 text-green-800 px-2 py-1 rounded">{selectedProduct.Size}</span>}
+                  {selectedProduct.Model && <span className="text-xs bg-purple-100 text-purple-800 px-2 py-1 rounded">{selectedProduct.Model}</span>}
+                </div>
+                <p className="text-sm text-gray-600">Current Stock: <span className="font-semibold">{selectedProduct.StockQuantity} units</span></p>
+                <p className="text-sm text-gray-600">Reorder Level: <span className="font-semibold">{selectedProduct.RecorderLevel} units</span></p>
               </div>
 
               <div>
@@ -226,8 +239,8 @@ const StaffInventory = ({ products, fetchProducts }) => {
                   <p className="text-sm text-blue-800">
                     New Stock: <span className="font-semibold">
                       {stockUpdate.action === 'add' 
-                        ? (selectedProduct.Stock || 0) + parseInt(stockUpdate.quantity)
-                        : (selectedProduct.Stock || 0) - parseInt(stockUpdate.quantity)
+                        ? selectedProduct.StockQuantity + parseInt(stockUpdate.quantity)
+                        : selectedProduct.StockQuantity - parseInt(stockUpdate.quantity)
                       } units
                     </span>
                   </p>
