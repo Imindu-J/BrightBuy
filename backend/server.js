@@ -1,35 +1,75 @@
+// server.js
 const express = require('express');
 const cors = require('cors');
 require('dotenv').config();
-const pool = require('./utils/db'); // import your MySQL pool
+const pool = require('./utils/db');
+const authorize = require('./middleware/auth');
+
+// Set default JWT secret if not provided
+if (!process.env.JWT_SECRET) {
+  process.env.JWT_SECRET = 'your_default_jwt_secret_key_here';
+  console.log('Warning: Using default JWT secret. Please set JWT_SECRET in environment variables for production.');
+}
 
 const app = express();
 app.use(cors());
 app.use(express.json());
 
-// Test database connection
+// Static file serving (for images)
+app.use('/images', express.static('public/images'));
+
+// Test DB connection at startup
 (async () => {
-    try {
-        const [rows] = await pool.query('SELECT NOW() AS currentTime');
-        console.log('Database connected! Current time:', rows[0].currentTime);
-    } catch (err) {
-        console.error('Database connection failed:', err);
-    }
+  try {
+    const [rows] = await pool.query('SELECT 1 AS test');
+    console.log('Database connected! Test query returned:', rows[0].test);
+  } catch (err) {
+    console.error('Database connection failed:', err.message);
+    console.error('Please make sure MySQL is running and the database exists.');
+    console.error('You can create the database by running the schema.sql file.');
+    process.exit(1); // Exit if DB cannot connect
+  }
 })();
 
-// Routes
-app.use('/auth', require('./routes/auth'));
-app.use('/products', require('./routes/products'));
-app.use('/admin', require('./routes/admin'));
-app.use('/categories', require('./routes/categories'));
-app.use('/variants', require('./routes/variants'));
-app.use('/cart', require('./routes/cart'));
-app.use('/order', require('./routes/order'));
-app.use('/delivery', require('./routes/delivery'));
-app.use('/transactions', require('./routes/transactions'));
-app.use('/reports', require('./routes/reports'));
+// Route Imports
+const authRoutes = require('./routes/auth');
+const adminRoutes = require('./routes/admin');
+const staffRoutes = require('./routes/staff');
+const productRoutes = require('./routes/products');
+const categoryRoutes = require('./routes/categories');
+const variantRoutes = require('./routes/variants');
+const cartRoutes = require('./routes/cart');
+const orderRoutes = require('./routes/order');
+const deliveryRoutes = require('./routes/delivery');
+const transactionRoutes = require('./routes/transactions');
+const reportRoutes = require('./routes/reports');
 
-// Example for customer-only routes
-// app.use('/cart', authorize(['customer']), require('./routes/cart'));
+// Public Routes (no auth required)
+app.use('/auth', authRoutes);
+app.use('/products', productRoutes);
+app.use('/categories', categoryRoutes);
+app.use('/variants', variantRoutes);
 
-app.listen(5000, () => console.log("Server running on port 5000"));
+// Protected Routes (require login and role checks)
+app.use('/admin', authorize(['admin']), adminRoutes);
+app.use('/staff', authorize(['staff']), staffRoutes);
+app.use('/order', authorize(['customer', 'staff', 'admin']), orderRoutes);
+app.use('/cart', authorize(['customer']), cartRoutes);
+app.use('/delivery', authorize(['staff', 'admin']), deliveryRoutes);
+app.use('/transactions', authorize(['admin']), transactionRoutes);
+app.use('/reports', authorize(['admin', 'staff']), reportRoutes);
+
+// Root Route
+app.get('/', (req, res) => {
+  res.json({ message: 'Retail Management API is running' });
+});
+
+// Global Error Handler
+app.use((err, req, res, next) => {
+  console.error('Unhandled error:', err);
+  res.status(500).json({ error: 'Internal Server Error' });
+});
+
+// Start Server
+const PORT = process.env.PORT || 5000;
+app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
