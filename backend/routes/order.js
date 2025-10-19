@@ -2,18 +2,50 @@ const router = require('express').Router();
 const db = require('../utils/db');
 const authorize = require('../middleware/auth');
 
+// Test endpoint to check database connectivity
+router.get('/test', async (req, res) => {
+  try {
+    const [rows] = await db.query('SELECT 1 as test');
+    res.json({ message: 'Database connection successful', test: rows[0].test });
+  } catch (error) {
+    console.error('Database test error:', error);
+    res.status(500).json({ error: 'Database connection failed', details: error.message });
+  }
+});
+
 // Place order with transaction safety and stock validation
 router.post('/', authorize(['customer']), async (req, res) => {
   const { items, specialInstructions, deliveryMethod, paymentMethod } = req.body;
+  
+  console.log('Order request received:', { items, specialInstructions, deliveryMethod, paymentMethod, userId: req.user.id, userRole: req.user.role });
   
   if (!items || items.length === 0) {
     return res.status(400).json({ error: 'No items in order' });
   }
 
-  const connection = await db.getConnection();
+  if (!req.user.id || isNaN(req.user.id)) {
+    return res.status(400).json({ error: 'Invalid user ID' });
+  }
+
+  // Validate items structure
+  for (const item of items) {
+    if (!item.variantId || !item.quantity || item.quantity <= 0) {
+      return res.status(400).json({ error: 'Invalid item data: variantId and quantity are required' });
+    }
+  }
+
+  let connection;
+  try {
+    connection = await db.getConnection();
+    console.log('Database connection established');
+  } catch (error) {
+    console.error('Database connection error:', error);
+    return res.status(500).json({ error: 'Database connection failed' });
+  }
   
   try {
     await connection.beginTransaction();
+    console.log('Transaction started');
 
     // Validate all items and calculate total
     let total = 0;
@@ -50,6 +82,7 @@ router.post('/', authorize(['customer']), async (req, res) => {
     }
 
     // Create order
+    console.log('Creating order with total:', total);
     const [orderResult] = await connection.query(
       `INSERT INTO Customer_Order (UserID, Status, TotalAmount, Special_Instructions) 
        VALUES (?, 'pending', ?, ?)`,
@@ -57,6 +90,7 @@ router.post('/', authorize(['customer']), async (req, res) => {
     );
 
     const orderId = orderResult.insertId;
+    console.log('Order created with ID:', orderId);
 
     // Create order items and update stock
     for (const item of validatedItems) {
@@ -77,20 +111,24 @@ router.post('/', authorize(['customer']), async (req, res) => {
     // Create delivery record
     if (deliveryMethod) {
       const estimatedDays = deliveryMethod === 'store_pickup' ? 1 : 5;
+      console.log('Creating delivery record:', { orderId, deliveryMethod, estimatedDays });
       await connection.query(
         `INSERT INTO Delivery (Order_ID, Delivery_Method, Status, Estimated_days) 
          VALUES (?, ?, 'pending', ?)`,
         [orderId, deliveryMethod, estimatedDays]
       );
+      console.log('Delivery record created');
     }
 
     // Create transaction record
     if (paymentMethod) {
+      console.log('Creating transaction record:', { orderId, paymentMethod, total });
       await connection.query(
         `INSERT INTO Transaction (OrderID, Payment_Method, Status, Total_Amount) 
          VALUES (?, ?, 'pending', ?)`,
         [orderId, paymentMethod, total]
       );
+      console.log('Transaction record created');
     }
 
     // Clear user's cart
@@ -107,6 +145,7 @@ router.post('/', authorize(['customer']), async (req, res) => {
     }
 
     await connection.commit();
+    console.log('Transaction committed successfully');
 
     res.json({ 
       message: 'Order placed successfully', 
@@ -116,11 +155,15 @@ router.post('/', authorize(['customer']), async (req, res) => {
     });
 
   } catch (error) {
-    await connection.rollback();
+    if (connection) {
+      await connection.rollback();
+    }
     console.error('Order placement error:', error);
     res.status(400).json({ error: error.message });
   } finally {
-    connection.release();
+    if (connection) {
+      connection.release();
+    }
   }
 });
 
