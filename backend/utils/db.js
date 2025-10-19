@@ -10,4 +10,9 @@ const pool = mysql.createPool({
     connectionLimit: 10,
 });
 
+// Add getConnection method for transactions
+pool.getConnection = async () => {
+    return await pool.getConnection();
+};
+
 module.exports = pool;
