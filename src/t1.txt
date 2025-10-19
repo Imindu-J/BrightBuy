@@ -1,0 +1,343 @@
+import React, { useState } from 'react';
+import {
+  ShoppingCart,
+  User,
+  Search,
+  Menu,
+  Star,
+  Plus,
+  Minus,
+  Heart,
+  Eye,
+  Store,
+  Truck,
+  Package,
+  CreditCard,
+} from 'lucide-react';
+
+// Signup Modal Component
+const SignupModal = ({ onClose, onSignup }) => {
+  const [userData, setUserData] = useState({
+    UserName: '',
+    Email: '',
+    Password: '',
+    PhoneNumber: '',
+    User_Address: '',
+  });
+
+  const handleChange = (e) => {
+    setUserData({ ...userData, [e.target.name]: e.target.value });
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    onSignup(userData);
+    onClose();
+  };
+
+  return (
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md">
+        <div className="bg-gradient-to-r from-blue-500 to-purple-500 text-white p-6 rounded-t-2xl">
+          <div className="flex justify-between items-center">
+            <h2 className="text-2xl font-bold">Create Account</h2>
+            <button
+              onClick={onClose}
+              className="text-white hover:bg-white/20 p-2 rounded-full"
+            >
+              ×
+            </button>
+          </div>
+        </div>
+        <form onSubmit={handleSubmit} className="p-6 space-y-4">
+          <input
+            type="text"
+            name="UserName"
+            placeholder="Full Name"
+            className="w-full px-4 py-2 border border-gray-300 rounded-lg"
+            required
+            onChange={handleChange}
+          />
+          <input
+            type="email"
+            name="Email"
+            placeholder="Email"
+            className="w-full px-4 py-2 border border-gray-300 rounded-lg"
+            required
+            onChange={handleChange}
+          />
+          <input
+            type="password"
+            name="Password"
+            placeholder="Password"
+            className="w-full px-4 py-2 border border-gray-300 rounded-lg"
+            required
+            onChange={handleChange}
+          />
+          <input
+            type="text"
+            name="PhoneNumber"
+            placeholder="Phone Number"
+            className="w-full px-4 py-2 border border-gray-300 rounded-lg"
+            onChange={handleChange}
+          />
+          <textarea
+            name="User_Address"
+            placeholder="Address"
+            className="w-full px-4 py-2 border border-gray-300 rounded-lg"
+            rows="3"
+            onChange={handleChange}
+          />
+          <button
+            type="submit"
+            className="w-full bg-gradient-to-r from-blue-500 to-purple-500 text-white font-bold py-3 px-6 rounded-lg hover:shadow-lg transform hover:scale-105 transition-all duration-300"
+          >
+            Sign Up
+          </button>
+        </form>
+      </div>
+    </div>
+  );
+};
+
+// Main BrightBuy Ecommerce Component
+const BrightBuyEcommerce = () => {
+  const [currentUser, setCurrentUser] = useState(null);
+  const [currentPage, setCurrentPage] = useState('home');
+  const [selectedCategory, setSelectedCategory] = useState('all');
+  const [cartItems, setCartItems] = useState([]);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [selectedProduct, setSelectedProduct] = useState(null);
+  const [showLogin, setShowLogin] = useState(false);
+  const [showCart, setShowCart] = useState(false);
+  const [showSignup, setShowSignup] = useState(false);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [selectedVariant, setSelectedVariant] = useState({});
+
+  // Mock categories
+  const categories = [
+    { CategoryID: 1, CategoryName: 'Smartphones' },
+    { CategoryID: 2, CategoryName: 'Audio Devices' },
+    { CategoryID: 3, CategoryName: 'Laptops' },
+    { CategoryID: 4, CategoryName: 'Gaming' },
+    { CategoryID: 5, CategoryName: 'Smart Home' },
+    { CategoryID: 6, CategoryName: 'Wearables' },
+    { CategoryID: 7, CategoryName: 'Tablets' },
+    { CategoryID: 8, CategoryName: 'Cameras' },
+    { CategoryID: 9, CategoryName: 'Accessories' },
+    { CategoryID: 10, CategoryName: 'TV & Entertainment' },
+  ];
+
+  // Mock products
+  const products = [
+    {
+      ProductID: 1,
+      ProductName: 'iPhone 15 Pro',
+      Brand: 'Apple',
+      Base_price: 999,
+      CategoryID: 1,
+      image: 'https://images.unsplash.com/photo-1592750475338-74b7b21085ab?w=400',
+      rating: 4.8,
+      reviews: 2341,
+    },
+    {
+      ProductID: 2,
+      ProductName: 'Samsung Galaxy S24',
+      Brand: 'Samsung',
+      Base_price: 899,
+      CategoryID: 1,
+      image: 'https://images.unsplash.com/photo-1610945265064-0e34e5519bbf?w=400',
+      rating: 4.6,
+      reviews: 1876,
+    },
+  ];
+
+  // Mock variants
+  const variants = [
+    { VariantID: 1, ProductID: 1, colour: 'Natural Titanium', size: '128GB', Model: 'Standard', Varient_Price: 999 },
+    { VariantID: 2, ProductID: 1, colour: 'Blue Titanium', size: '256GB', Model: 'Standard', Varient_Price: 1099 },
+    { VariantID: 3, ProductID: 2, colour: 'Phantom Black', size: '128GB', Model: 'Standard', Varient_Price: 899 },
+    { VariantID: 4, ProductID: 2, colour: 'Cream', size: '256GB', Model: 'Standard', Varient_Price: 999 },
+  ];
+
+  const getProductVariants = (productId) => variants.filter(v => v.ProductID === productId);
+
+  const getSelectedVariantPrice = (productId) => {
+    const productVariants = getProductVariants(productId);
+    const selected = selectedVariant[productId];
+    if (selected && productVariants.length > 0) {
+      const variant = productVariants.find(v =>
+        v.colour === selected.colour &&
+        v.size === selected.size &&
+        v.Model === selected.Model
+      );
+      return variant ? variant.Varient_Price : productVariants[0].Varient_Price;
+    }
+    return productVariants[0]?.Varient_Price || 0;
+  };
+
+  const filteredProducts = products.filter(product => {
+    const matchesCategory = selectedCategory === 'all' || product.CategoryID === parseInt(selectedCategory);
+    const matchesSearch = product.ProductName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      product.Brand.toLowerCase().includes(searchTerm.toLowerCase());
+    return matchesCategory && matchesSearch;
+  });
+
+  const addToCart = (product) => {
+    const productVariants = getProductVariants(product.ProductID);
+    const selectedVar = selectedVariant[product.ProductID] || productVariants[0];
+    const variant = productVariants.find(v =>
+      v.colour === selectedVar.colour &&
+      v.size === selectedVar.size &&
+      v.Model === selectedVar.Model
+    ) || productVariants[0];
+
+    const existingItem = cartItems.find(item =>
+      item.ProductID === product.ProductID && item.VariantID === variant.VariantID
+    );
+
+    if (existingItem) {
+      setCartItems(cartItems.map(item =>
+        item.ProductID === product.ProductID && item.VariantID === variant.VariantID
+          ? { ...item, Quantity: item.Quantity + 1 }
+          : item
+      ));
+    } else {
+      setCartItems([...cartItems, {
+        CartID: Date.now(),
+        ProductID: product.ProductID,
+        VariantID: variant.VariantID,
+        ProductName: product.ProductName,
+        Brand: product.Brand,
+        image: product.image,
+        Quantity: 1,
+        UnitPrice: variant.Varient_Price,
+        colour: variant.colour,
+        size: variant.size,
+        Model: variant.Model
+      }]);
+    }
+  };
+
+  const handleSignup = (userData) => {
+    console.log('New user signed up:', userData);
+    setCurrentUser({
+      UserID: Date.now(),
+      ...userData,
+      Role: 'Customer'
+    });
+    setShowSignup(false);
+  };
+
+  return (
+    <div>
+      {/* Header */}
+      <header className="bg-gradient-to-r from-blue-600 via-purple-600 to-blue-800 text-white shadow-2xl p-4 flex justify-between items-center">
+        <h1 className="text-3xl font-bold">BrightBuy</h1>
+        <div className="flex items-center space-x-4">
+          <button onClick={() => setShowCart(true)} className="relative">
+            <ShoppingCart size={24} />
+            {cartItems.length > 0 && (
+              <span className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full px-2 text-xs">
+                {cartItems.length}
+              </span>
+            )}
+          </button>
+          <button onClick={() => setShowLogin(true)}>
+            <User size={24} />
+          </button>
+        </div>
+      </header>
+
+      {/* Search */}
+      <div className="p-4 flex justify-center">
+        <input
+          type="text"
+          placeholder="Search products..."
+          className="border border-gray-300 p-2 rounded-lg w-full max-w-xl"
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+        />
+      </div>
+
+      {/* Category Filter */}
+      <div className="flex justify-center space-x-2 overflow-x-auto p-2">
+        <button
+          className={`px-4 py-2 rounded-full ${selectedCategory === 'all' ? 'bg-blue-500 text-white' : 'bg-gray-200'}`}
+          onClick={() => setSelectedCategory('all')}
+        >
+          All
+        </button>
+        {categories.map(cat => (
+          <button
+            key={cat.CategoryID}
+            className={`px-4 py-2 rounded-full ${selectedCategory == cat.CategoryID ? 'bg-blue-500 text-white' : 'bg-gray-200'}`}
+            onClick={() => setSelectedCategory(cat.CategoryID)}
+          >
+            {cat.CategoryName}
+          </button>
+        ))}
+      </div>
+
+      {/* Product Grid */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 p-4">
+        {filteredProducts.map(product => (
+          <div key={product.ProductID} className="border border-gray-300 rounded-lg p-4 flex flex-col">
+            <img src={product.image} alt={product.ProductName} className="h-40 object-cover rounded-lg mb-2" />
+            <h3 className="font-bold">{product.ProductName}</h3>
+            <p className="text-gray-500">{product.Brand}</p>
+            <p className="font-semibold mt-1">${getSelectedVariantPrice(product.ProductID)}</p>
+            <button
+              className="mt-auto bg-blue-500 text-white py-2 px-4 rounded-lg hover:bg-blue-600"
+              onClick={() => addToCart(product)}
+            >
+              Add to Cart
+            </button>
+          </div>
+        ))}
+      </div>
+
+      {/* Modals */}
+      {showSignup && <SignupModal onClose={() => setShowSignup(false)} onSignup={handleSignup} />}
+      {showLogin && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white p-6 rounded-xl w-full max-w-md">
+            <h2 className="text-2xl font-bold mb-4">Login</h2>
+            <button
+              className="text-blue-500 hover:underline"
+              onClick={() => {
+                setShowLogin(false);
+                setShowSignup(true);
+              }}
+            >
+              Sign Up Instead
+            </button>
+            <button onClick={() => setShowLogin(false)} className="absolute top-4 right-4 text-gray-600 text-xl">×</button>
+          </div>
+        </div>
+      )}
+      {showCart && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white p-6 rounded-xl w-full max-w-lg">
+            <h2 className="text-2xl font-bold mb-4">Cart</h2>
+            <button onClick={() => setShowCart(false)} className="absolute top-4 right-4 text-gray-600 text-xl">×</button>
+            {cartItems.length === 0 ? (
+              <p>Your cart is empty.</p>
+            ) : (
+              <ul>
+                {cartItems.map(item => (
+                  <li key={item.CartID} className="flex justify-between mb-2">
+                    <span>{item.ProductName} ({item.colour})</span>
+                    <span>${item.UnitPrice} x {item.Quantity}</span>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
+export default BrightBuyEcommerce;
