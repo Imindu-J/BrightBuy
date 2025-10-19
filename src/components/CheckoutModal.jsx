@@ -16,16 +16,20 @@ const CheckoutModal = ({
     e.preventDefault();
     setLoading(true);
     
+    const orderData = {
+      items: cartItems.map(item => ({
+        variantId: item.VariantID,
+        quantity: item.Quantity
+      })),
+      specialInstructions,
+      deliveryMethod,
+      paymentMethod
+    };
+    
+    console.log('Sending order data:', orderData);
+    
     try {
-      await handlePlaceOrder({
-        items: cartItems.map(item => ({
-          variantId: item.VariantID,
-          quantity: item.Quantity
-        })),
-        specialInstructions,
-        deliveryMethod,
-        paymentMethod
-      });
+      await handlePlaceOrder(orderData);
       setShowCheckout(false);
     } catch (error) {
       console.error('Checkout error:', error);

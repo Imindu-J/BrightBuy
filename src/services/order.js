@@ -4,14 +4,19 @@ const API_URL = 'http://localhost:5000/order';
 
 export const placeOrder = async (orderData, token) => {
   try {
+    console.log('Placing order with data:', orderData);
+    console.log('Using token:', token ? 'Present' : 'Missing');
+    
     const res = await axios.post(
       API_URL,
       orderData,
       { headers: { Authorization: `Bearer ${token}` } }
     );
+    console.log('Order placed successfully:', res.data);
     return res.data;
   } catch (error) {
     console.error('Error placing order:', error);
+    console.error('Error response:', error.response?.data);
     throw error;
   }
 };
