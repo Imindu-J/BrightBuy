@@ -50,7 +50,7 @@ const CartModal = ({ cartItems, setShowCart, updateQuantity, getTotalPrice, hand
                 <div className="flex-1">
                   <h3 className="font-semibold text-gray-800">{item.ProductName}</h3>
                   <p className="text-sm text-gray-600">{item.Brand}</p>
-                  <p className="text-xs text-gray-500">{item.colour} • {item.size} • {item.Model}</p>
+                  <p className="text-xs text-gray-500">{item.Colour} • {item.Size} • {item.Model}</p>
                   <p className="text-lg font-bold text-green-600">${item.UnitPrice.toLocaleString()}</p>
                 </div>
                 <div className="flex items-center space-x-3">

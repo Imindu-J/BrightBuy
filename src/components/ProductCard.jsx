@@ -42,18 +42,18 @@ const ProductCard = ({ product, onView, onAddToCart, selectedVariant, setSelecte
       {productVariants.length > 1 && (
         <div className="mb-4 space-y-2">
           <div className="flex flex-wrap gap-2">
-            {[...new Set(productVariants.map(v => v.colour))].map(colour => (
+            {[...new Set(productVariants.map(v => v.Colour))].map(colour => (
               <button
                 key={colour}
                 onClick={() => setSelectedVariant({
                   ...selectedVariant,
                   [product.ProductID]: {
                     ...selectedVariant[product.ProductID],
-                    colour: colour
+                    Colour: colour
                   }
                 })}
                 className={`px-3 py-1 rounded-full text-xs font-medium transition-all ${
-                  (selectedVariant[product.ProductID]?.colour || productVariants[0].colour) === colour
+                  (selectedVariant[product.ProductID]?.Colour || productVariants[0].Colour) === colour
                     ? 'bg-blue-500 text-white'
                     : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                 }`}
@@ -63,18 +63,18 @@ const ProductCard = ({ product, onView, onAddToCart, selectedVariant, setSelecte
             ))}
           </div>
           <div className="flex flex-wrap gap-2">
-            {[...new Set(productVariants.map(v => v.size))].map(size => (
+            {[...new Set(productVariants.map(v => v.Size))].map(size => (
               <button
                 key={size}
                 onClick={() => setSelectedVariant({
                   ...selectedVariant,
                   [product.ProductID]: {
                     ...selectedVariant[product.ProductID],
-                    size: size
+                    Size: size
                   }
                 })}
                 className={`px-3 py-1 rounded-full text-xs font-medium transition-all ${
-                  (selectedVariant[product.ProductID]?.size || productVariants[0].size) === size
+                  (selectedVariant[product.ProductID]?.Size || productVariants[0].Size) === size
                     ? 'bg-purple-500 text-white'
                     : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                 }`}

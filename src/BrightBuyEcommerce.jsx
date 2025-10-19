@@ -104,8 +104,8 @@ const BrightBuyEcommerce = () => {
     const selected = selectedVariant[productId];
     if (selected && productVariants.length > 0) {
       const variant = productVariants.find(v =>
-        v.Colour === selected.colour &&
-        v.Size === selected.size &&
+        v.Colour === selected.Colour &&
+        v.Size === selected.Size &&
         v.Model === selected.Model
       );
       return variant ? variant.Variant_Price : productVariants[0].Variant_Price;
@@ -129,8 +129,8 @@ const BrightBuyEcommerce = () => {
     const productVariants = getProductVariants(product.ProductID);
     const selectedVar = selectedVariant[product.ProductID] || productVariants[0];
     const variant = productVariants.find(v =>
-      v.Colour === selectedVar.colour &&
-      v.Size === selectedVar.size &&
+      v.Colour === selectedVar.Colour &&
+      v.Size === selectedVar.Size &&
       v.Model === selectedVar.Model
     ) || productVariants[0];
 
@@ -195,6 +195,11 @@ const BrightBuyEcommerce = () => {
         localStorage.setItem('token', data.token);
         setCurrentUser(data.user);
         setShowLogin(false);
+        
+        // Load user's cart if they're a customer
+        if (data.user.Role === 'customer') {
+          loadUserCart(data.token);
+        }
         
         // Role-based navigation after login
         if (data.user.Role === 'admin') {

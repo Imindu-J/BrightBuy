@@ -20,8 +20,7 @@ const CheckoutModal = ({
       await handlePlaceOrder({
         items: cartItems.map(item => ({
           variantId: item.VariantID,
-          quantity: item.Quantity,
-          price: item.UnitPrice
+          quantity: item.Quantity
         })),
         specialInstructions,
         deliveryMethod,

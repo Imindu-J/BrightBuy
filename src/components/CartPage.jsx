@@ -22,14 +22,20 @@ const CartPage = () => {
   // Update cart item quantity
   const updateQuantity = async (cartId, variantId, change) => {
     try {
-      await axios.post(
-        'http://localhost:5000/cart/add',
-        { variantId, quantity: change },
+      const currentItem = cartItems.find(item => item.CartID === cartId && item.VariantID === variantId);
+      if (!currentItem) return;
+
+      const newQuantity = Math.max(0, currentItem.Quantity + change);
+      
+      await axios.put(
+        'http://localhost:5000/cart/update',
+        { variantId, quantity: newQuantity },
         { headers: { Authorization: `Bearer ${token}` } }
       );
       fetchCart(); // refresh after updating
     } catch (error) {
       console.error('Error updating quantity:', error);
+      alert(error.response?.data?.error || 'Failed to update cart');
     }
   };
 
