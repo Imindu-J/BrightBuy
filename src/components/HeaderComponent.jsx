@@ -1,6 +1,6 @@
 import React from 'react';
 
-const HeaderComponent = ({ cartItems, setShowCart, currentUser, setCurrentPage, setShowLogin, searchTerm, setSearchTerm, isMenuOpen, setIsMenuOpen }) => (
+const HeaderComponent = ({ cartItems, setShowCart, currentUser, setCurrentPage, setShowLogin, searchTerm, setSearchTerm, isMenuOpen, setIsMenuOpen, isSearching }) => (
   <header className="bg-gradient-to-r from-blue-600 via-purple-600 to-blue-800 text-white shadow-2xl">
     <div className="container mx-auto px-4 py-4">
       <div className="flex items-center justify-between">
@@ -18,7 +18,13 @@ const HeaderComponent = ({ cartItems, setShowCart, currentUser, setCurrentPage, 
         </div>
         <div className="hidden lg:flex flex-1 max-w-lg mx-8">
           <div className="relative w-full">
-            {/* Search icon here if needed */}
+            <div className="absolute left-3 top-1/2 transform -translate-y-1/2">
+              {isSearching ? (
+                <div className="animate-spin w-4 h-4 border-2 border-white/30 border-t-white rounded-full"></div>
+              ) : (
+                <span className="text-white/70">🔍</span>
+              )}
+            </div>
             <input
               type="text"
               placeholder="Search products..."
@@ -84,7 +90,13 @@ const HeaderComponent = ({ cartItems, setShowCart, currentUser, setCurrentPage, 
       {/* Mobile search */}
       <div className="lg:hidden mt-4">
         <div className="relative">
-          {/* Search icon here if needed */}
+          <div className="absolute left-3 top-1/2 transform -translate-y-1/2">
+            {isSearching ? (
+              <div className="animate-spin w-4 h-4 border-2 border-white/30 border-t-white rounded-full"></div>
+            ) : (
+              <span className="text-white/70">🔍</span>
+            )}
+          </div>
           <input
             type="text"
             placeholder="Search products..."

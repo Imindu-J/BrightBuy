@@ -33,6 +33,8 @@ const BrightBuyEcommerce = () => {
   const [categories, setCategories] = useState([]);
   const [products, setProducts] = useState([]);
   const [variants, setVariants] = useState([]);
+  const [searchResults, setSearchResults] = useState([]);
+  const [isSearching, setIsSearching] = useState(false);
 
   // Fetch categories
   useEffect(() => {
@@ -46,10 +48,7 @@ const BrightBuyEcommerce = () => {
   useEffect(() => {
     fetch('http://localhost:5000/products')
       .then(res => res.json())
-      .then(data => {
-        console.log('Products loaded:', data.length, data);
-        setProducts(data);
-      })
+      .then(data => setProducts(data))
       .catch(err => console.error('Failed to fetch products', err));
   }, []);
 
@@ -57,12 +56,38 @@ const BrightBuyEcommerce = () => {
   useEffect(() => {
     fetch('http://localhost:5000/products/variants')
       .then(res => res.json())
-      .then(data => {
-        console.log('Variants loaded:', data.length, data);
-        setVariants(data);
-      })
+      .then(data => setVariants(data))
       .catch(err => console.error('Failed to fetch variants', err));
   }, []);
+
+  // Debounced search function
+  useEffect(() => {
+    const searchProducts = async () => {
+      if (!searchTerm.trim()) {
+        setSearchResults([]);
+        setIsSearching(false);
+        return;
+      }
+
+      setIsSearching(true);
+      try {
+        const response = await fetch(
+          `http://localhost:5000/products/search?q=${encodeURIComponent(searchTerm)}&category=${selectedCategory}`
+        );
+        const data = await response.json();
+        setSearchResults(data);
+      } catch (error) {
+        console.error('Search error:', error);
+        setSearchResults([]);
+      } finally {
+        setIsSearching(false);
+      }
+    };
+
+    // Debounce search by 300ms
+    const timeoutId = setTimeout(searchProducts, 300);
+    return () => clearTimeout(timeoutId);
+  }, [searchTerm, selectedCategory]);
 
   // Check for existing session on page load
   useEffect(() => {
@@ -112,16 +137,6 @@ const BrightBuyEcommerce = () => {
     const product = products.find(p => p.ProductID === productId);
     const selected = selectedVariant[productId];
     
-    // Debug logging
-    if (productId === 1) { // Debug for first product
-      console.log('Price Debug for Product', productId, {
-        productVariants: productVariants.length,
-        product: product?.ProductName,
-        basePrice: product?.Base_price,
-        selected: selected,
-        firstVariantPrice: productVariants[0]?.Variant_Price
-      });
-    }
     
     if (selected && productVariants.length > 0) {
       const variant = productVariants.find(v =>
@@ -141,12 +156,44 @@ const BrightBuyEcommerce = () => {
     return product?.Base_price || 0;
   };
 
-  const filteredProducts = products.filter(product => {
-    const matchesCategory = selectedCategory === 'all' || product.CategoryID === parseInt(selectedCategory);
-    const matchesSearch = product.ProductName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                          product.Brand.toLowerCase().includes(searchTerm.toLowerCase());
-    return matchesCategory && matchesSearch;
-  });
+  // Enhanced search function with fuzzy matching
+  const fuzzySearch = (text, searchTerm) => {
+    if (!searchTerm) return true;
+    
+    const searchLower = searchTerm.toLowerCase().trim();
+    const textLower = text.toLowerCase();
+    
+    // Exact match
+    if (textLower.includes(searchLower)) return true;
+    
+    // Word boundary match (e.g., "lapt" matches "laptop")
+    const words = textLower.split(/\s+/);
+    for (const word of words) {
+      if (word.startsWith(searchLower)) return true;
+    }
+    
+    // Fuzzy match - check if search term characters appear in order
+    let searchIndex = 0;
+    for (let i = 0; i < textLower.length && searchIndex < searchLower.length; i++) {
+      if (textLower[i] === searchLower[searchIndex]) {
+        searchIndex++;
+      }
+    }
+    
+    // If we found all characters in order, it's a match
+    return searchIndex === searchLower.length;
+  };
+
+  // Use search results if available, otherwise use local filtering
+  const filteredProducts = searchTerm.trim() 
+    ? searchResults.filter(product => {
+        const matchesCategory = selectedCategory === 'all' || product.CategoryID === parseInt(selectedCategory);
+        return matchesCategory;
+      })
+    : products.filter(product => {
+        const matchesCategory = selectedCategory === 'all' || product.CategoryID === parseInt(selectedCategory);
+        return matchesCategory;
+      });
 
   const addToCart = async (product) => {
     if (!currentUser) {
@@ -303,6 +350,7 @@ const BrightBuyEcommerce = () => {
         setSearchTerm={setSearchTerm}
         isMenuOpen={isMenuOpen}
         setIsMenuOpen={setIsMenuOpen}
+        isSearching={isSearching}
       />
 
       <CategoryNav
@@ -312,13 +360,33 @@ const BrightBuyEcommerce = () => {
       />
 
       {currentPage === 'home' && (
-        <HomePage
-          categories={categories}
-          setSelectedCategory={setSelectedCategory}
-          filteredProducts={filteredProducts}
-          ProductCard={ProductCard}
-          productCardProps={productCardProps}
-        />
+        <div>
+          {searchTerm.trim() && (
+            <div className="bg-blue-50 border-l-4 border-blue-400 p-4 mx-4 mt-4">
+              <div className="flex items-center">
+                <div className="flex-shrink-0">
+                  <span className="text-blue-400">🔍</span>
+                </div>
+                <div className="ml-3">
+                  <p className="text-sm text-blue-700">
+                    {isSearching ? (
+                      'Searching...'
+                    ) : (
+                      `Found ${filteredProducts.length} result${filteredProducts.length !== 1 ? 's' : ''} for "${searchTerm}"`
+                    )}
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
+          <HomePage
+            categories={categories}
+            setSelectedCategory={setSelectedCategory}
+            filteredProducts={filteredProducts}
+            ProductCard={ProductCard}
+            productCardProps={productCardProps}
+          />
+        </div>
       )}
 
       {currentPage === 'profile' && (
