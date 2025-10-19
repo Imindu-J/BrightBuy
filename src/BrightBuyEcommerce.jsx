@@ -46,7 +46,10 @@ const BrightBuyEcommerce = () => {
   useEffect(() => {
     fetch('http://localhost:5000/products')
       .then(res => res.json())
-      .then(data => setProducts(data))
+      .then(data => {
+        console.log('Products loaded:', data.length, data);
+        setProducts(data);
+      })
       .catch(err => console.error('Failed to fetch products', err));
   }, []);
 
@@ -54,7 +57,10 @@ const BrightBuyEcommerce = () => {
   useEffect(() => {
     fetch('http://localhost:5000/products/variants')
       .then(res => res.json())
-      .then(data => setVariants(data))
+      .then(data => {
+        console.log('Variants loaded:', data.length, data);
+        setVariants(data);
+      })
       .catch(err => console.error('Failed to fetch variants', err));
   }, []);
 
@@ -103,7 +109,20 @@ const BrightBuyEcommerce = () => {
 
   const getSelectedVariantPrice = (productId) => {
     const productVariants = getProductVariants(productId);
+    const product = products.find(p => p.ProductID === productId);
     const selected = selectedVariant[productId];
+    
+    // Debug logging
+    if (productId === 1) { // Debug for first product
+      console.log('Price Debug for Product', productId, {
+        productVariants: productVariants.length,
+        product: product?.ProductName,
+        basePrice: product?.Base_price,
+        selected: selected,
+        firstVariantPrice: productVariants[0]?.Variant_Price
+      });
+    }
+    
     if (selected && productVariants.length > 0) {
       const variant = productVariants.find(v =>
         v.Colour === selected.Colour &&
@@ -112,7 +131,14 @@ const BrightBuyEcommerce = () => {
       );
       return variant ? variant.Variant_Price : productVariants[0].Variant_Price;
     }
-    return productVariants[0]?.Variant_Price || 0;
+    
+    // Fallback to first variant price or product base price
+    if (productVariants.length > 0) {
+      return productVariants[0].Variant_Price;
+    }
+    
+    // Final fallback to product base price
+    return product?.Base_price || 0;
   };
 
   const filteredProducts = products.filter(product => {
