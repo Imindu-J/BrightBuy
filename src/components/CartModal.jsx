@@ -1,7 +1,25 @@
-import React from 'react';
+import React, { useState } from 'react';
+import CheckoutModal from './CheckoutModal';
 
-const CartModal = ({ cartItems, setShowCart, updateQuantity, getTotalPrice, handleCheckout, currentUser }) => (
-  <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+const CartModal = ({ cartItems, setShowCart, updateQuantity, getTotalPrice, handleCheckout, currentUser }) => {
+  const [showCheckout, setShowCheckout] = useState(false);
+
+  const handlePlaceOrder = async (orderData) => {
+    await handleCheckout(orderData);
+  };
+
+  return (
+    <>
+      {showCheckout && (
+        <CheckoutModal
+          cartItems={cartItems}
+          setShowCheckout={setShowCheckout}
+          handlePlaceOrder={handlePlaceOrder}
+          currentUser={currentUser}
+          getTotalPrice={getTotalPrice}
+        />
+      )}
+      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
     <div className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-hidden">
       <div className="bg-gradient-to-r from-blue-500 to-purple-500 text-white p-6">
         <div className="flex justify-between items-center">
@@ -62,15 +80,17 @@ const CartModal = ({ cartItems, setShowCart, updateQuantity, getTotalPrice, hand
             <span className="text-2xl font-bold text-green-600">${getTotalPrice().toLocaleString()}</span>
           </div>
           <button
-            onClick={handleCheckout}
+            onClick={() => currentUser ? setShowCheckout(true) : setShowCart(false)}
             className="w-full mt-4 bg-gradient-to-r from-green-500 to-blue-500 text-white font-bold py-3 px-6 rounded-xl hover:shadow-lg transform hover:scale-105 transition-all duration-300"
           >
-            {currentUser ? 'Place Order' : 'Login to Checkout'}
+            {currentUser ? 'Proceed to Checkout' : 'Login to Checkout'}
           </button>
         </div>
       )}
     </div>
   </div>
-);
+    </>
+  );
+};
 
 export default CartModal;

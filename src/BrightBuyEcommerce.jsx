@@ -10,6 +10,8 @@ import HomePage from './components/HomePage';
 import SignupModalClean from './components/SignupModalClean';
 import AdminDashboard from './components/AdminDashboard';
 import StaffDashboard from './components/StaffDashboard';
+import { getCart, addToCart as addToCartAPI, updateCartQuantity, removeFromCart } from './services/cart';
+import { placeOrder, getMyOrders } from './services/order';
 
 const BrightBuyEcommerce = () => {
   // State
@@ -71,6 +73,10 @@ const BrightBuyEcommerce = () => {
           } else if (data.user.Role === 'staff') {
             setCurrentPage('staff');
           }
+          // Load user's cart if they're a customer
+          if (data.user.Role === 'customer') {
+            loadUserCart(token);
+          }
         }
       })
       .catch(err => {
@@ -79,6 +85,16 @@ const BrightBuyEcommerce = () => {
       });
     }
   }, []);
+
+  // Load user's cart from backend
+  const loadUserCart = async (token) => {
+    try {
+      const cartData = await getCart(token);
+      setCartItems(cartData);
+    } catch (error) {
+      console.error('Error loading cart:', error);
+    }
+  };
 
   // Helper functions
   const getProductVariants = (productId) => variants.filter(v => v.ProductID === productId);
@@ -104,7 +120,12 @@ const BrightBuyEcommerce = () => {
     return matchesCategory && matchesSearch;
   });
 
-  const addToCart = (product) => {
+  const addToCart = async (product) => {
+    if (!currentUser) {
+      setShowLogin(true);
+      return;
+    }
+
     const productVariants = getProductVariants(product.ProductID);
     const selectedVar = selectedVariant[product.ProductID] || productVariants[0];
     const variant = productVariants.find(v =>
@@ -113,42 +134,49 @@ const BrightBuyEcommerce = () => {
       v.Model === selectedVar.Model
     ) || productVariants[0];
 
-    const existingItem = cartItems.find(item =>
-      item.ProductID === product.ProductID &&
-      item.VariantID === variant.VariantID
-    );
+    if (!variant) {
+      alert('Please select a variant');
+      return;
+    }
 
-    if (existingItem) {
-      setCartItems(cartItems.map(item =>
-        item.ProductID === product.ProductID && item.VariantID === variant.VariantID
-          ? { ...item, Quantity: item.Quantity + 1 }
-          : item
-      ));
-    } else {
-      setCartItems([...cartItems, {
-        CartID: Date.now(),
-        ProductID: product.ProductID,
-        VariantID: variant.VariantID,
-        ProductName: product.ProductName,
-        Brand: product.Brand,
-        image: product.ImageURL,
-        Quantity: 1,
-        UnitPrice: variant.Variant_Price,
-        colour: variant.Colour,
-        size: variant.Size,
-        Model: variant.Model
-      }]);
+    try {
+      const token = localStorage.getItem('token');
+      console.log('Token from localStorage:', token ? 'Present' : 'Missing');
+      console.log('Adding to cart:', { variantId: variant.VariantID, quantity: 1 });
+      
+      await addToCartAPI(variant.VariantID, 1, token);
+      
+      // Reload cart from backend
+      const cartData = await getCart(token);
+      setCartItems(cartData);
+      
+      alert('Item added to cart successfully!');
+    } catch (error) {
+      console.error('Error adding to cart:', error);
+      console.error('Error response:', error.response?.data);
+      alert(error.response?.data?.error || 'Failed to add item to cart');
     }
   };
 
-  const updateQuantity = (cartId, variantId, change) => {
-    setCartItems(cartItems.map(item => {
-      if (item.CartID === cartId && item.VariantID === variantId) {
-        const newQuantity = Math.max(0, item.Quantity + change);
-        return newQuantity === 0 ? null : { ...item, Quantity: newQuantity };
-      }
-      return item;
-    }).filter(Boolean));
+  const updateQuantity = async (cartId, variantId, change) => {
+    if (!currentUser) return;
+
+    const currentItem = cartItems.find(item => item.CartID === cartId && item.VariantID === variantId);
+    if (!currentItem) return;
+
+    const newQuantity = Math.max(0, currentItem.Quantity + change);
+
+    try {
+      const token = localStorage.getItem('token');
+      await updateCartQuantity(variantId, newQuantity, token);
+      
+      // Reload cart from backend
+      const cartData = await getCart(token);
+      setCartItems(cartData);
+    } catch (error) {
+      console.error('Error updating cart:', error);
+      alert(error.response?.data?.error || 'Failed to update cart');
+    }
   };
 
   const getTotalPrice = () => cartItems.reduce((total, item) => total + (item.UnitPrice * item.Quantity), 0);
@@ -186,23 +214,37 @@ const BrightBuyEcommerce = () => {
   };
 
 
-  const handleCheckout = () => {
+  const handleCheckout = async (orderData) => {
     if (!currentUser) {
       setShowLogin(true);
       return;
     }
-    const newOrder = {
-      OrderID: Date.now(),
-      OrderDate: new Date().toISOString(),
-      Status: 'Processing',
-      TotalAmount: getTotalPrice(),
-      UserID: currentUser.UserID,
-      items: cartItems
-    };
-    setOrderHistory([...orderHistory, newOrder]);
-    setCartItems([]);
-    setShowCart(false);
-    alert('Order placed successfully!');
+
+    if (cartItems.length === 0) {
+      alert('Your cart is empty');
+      return;
+    }
+
+    try {
+      const token = localStorage.getItem('token');
+      
+      // Place order
+      const result = await placeOrder(orderData, token);
+      
+      // Clear cart and show success
+      setCartItems([]);
+      setShowCart(false);
+      
+      // Load updated order history
+      const orders = await getMyOrders(token);
+      setOrderHistory(orders);
+      
+      alert(`Order placed successfully! Order ID: ${result.orderId}`);
+    } catch (error) {
+      console.error('Error placing order:', error);
+      alert(error.response?.data?.error || 'Failed to place order');
+      throw error; // Re-throw to handle in CheckoutModal
+    }
   };
 
   const productCardProps = (product) => ({
@@ -251,6 +293,17 @@ const BrightBuyEcommerce = () => {
           orderHistory={orderHistory}
           setCurrentPage={setCurrentPage}
           setCurrentUser={setCurrentUser}
+          loadOrderHistory={async () => {
+            if (currentUser && currentUser.Role === 'customer') {
+              try {
+                const token = localStorage.getItem('token');
+                const orders = await getMyOrders(token);
+                setOrderHistory(orders);
+              } catch (error) {
+                console.error('Error loading order history:', error);
+              }
+            }
+          }}
         />
       )}
 

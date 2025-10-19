@@ -1,6 +1,14 @@
 import React from 'react';
 
-const ProfilePage = ({ currentUser, orderHistory, setCurrentPage, setCurrentUser }) => (
+const ProfilePage = ({ currentUser, orderHistory, setCurrentPage, setCurrentUser, loadOrderHistory }) => {
+  // Load order history when component mounts
+  React.useEffect(() => {
+    if (loadOrderHistory) {
+      loadOrderHistory();
+    }
+  }, [loadOrderHistory]);
+
+  return (
   <div className="container mx-auto px-4 py-8">
     <div className="max-w-4xl mx-auto">
       <div className="bg-white rounded-2xl shadow-xl overflow-hidden">
@@ -79,10 +87,18 @@ const ProfilePage = ({ currentUser, orderHistory, setCurrentPage, setCurrentUser
                           <h3 className="font-semibold text-gray-800">Order #{order.OrderID}</h3>
                           <p className="text-sm text-gray-600">{new Date(order.OrderDate).toLocaleDateString()}</p>
                         </div>
-                        <span className="bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm font-medium">{order.Status}</span>
+                        <span className={`px-3 py-1 rounded-full text-sm font-medium ${
+                          order.Status === 'delivered' ? 'bg-green-100 text-green-800' :
+                          order.Status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
+                          order.Status === 'processing' ? 'bg-blue-100 text-blue-800' :
+                          order.Status === 'shipped' ? 'bg-purple-100 text-purple-800' :
+                          'bg-red-100 text-red-800'
+                        }`}>
+                          {order.Status}
+                        </span>
                       </div>
                       <div className="flex justify-between items-end">
-                        <p className="text-sm text-gray-600">{order.items.length} item(s)</p>
+                        <p className="text-sm text-gray-600">{order.items ? order.items.length : 0} item(s)</p>
                         <p className="text-lg font-bold text-green-600">${order.TotalAmount.toLocaleString()}</p>
                       </div>
                     </div>
@@ -113,6 +129,7 @@ const ProfilePage = ({ currentUser, orderHistory, setCurrentPage, setCurrentUser
       </div>
     </div>
   </div>
-);
+  );
+};
 
 export default ProfilePage;
