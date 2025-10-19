@@ -12,7 +12,7 @@ router.get('/:productId', async (req, res) => {
 router.post('/', authorize(['warehouse_admin','system_admin']), async (req, res) => {
   const { productId, colour, size, model, price, stock, reorder, status } = req.body;
   const [result] = await db.query(
-    `INSERT INTO Variant (ProductID, Colour, Size, Model, Varient_Price, StockQuantity, RecorderLevel, Status)
+    `INSERT INTO Variant (ProductID, Colour, Size, Model, Variant_Price, StockQuantity, RecorderLevel, Status)
      VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
     [productId, colour, size, model, price, stock, reorder, status]
   );
