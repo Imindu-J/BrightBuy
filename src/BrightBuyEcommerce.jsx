@@ -3,6 +3,7 @@ import HeaderComponent from './components/HeaderComponent';
 import CategoryNav from './components/CategoryNav';
 import ProductCard from './components/ProductCard';
 import CartModal from './components/CartModal';
+import CheckoutModal from './components/CheckoutModal';
 import LoginModal from './components/LoginModal';
 import ProductModal from './components/ProductModal';
 import ProfilePage from './components/ProfilePage';
@@ -23,6 +24,7 @@ const BrightBuyEcommerce = () => {
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [showLogin, setShowLogin] = useState(false);
   const [showCart, setShowCart] = useState(false);
+  const [showCheckout, setShowCheckout] = useState(false);
   const [orderHistory, setOrderHistory] = useState([]);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [selectedVariant, setSelectedVariant] = useState({});
@@ -239,6 +241,7 @@ const BrightBuyEcommerce = () => {
       // Clear cart and show success
       setCartItems([]);
       setShowCart(false);
+      setShowCheckout(false);
       
       // Load updated order history
       const orders = await getMyOrders(token);
@@ -336,6 +339,7 @@ const BrightBuyEcommerce = () => {
           getTotalPrice={getTotalPrice}
           handleCheckout={handleCheckout}
           currentUser={currentUser}
+          setShowCheckout={setShowCheckout}
         />
       )}
 
@@ -367,6 +371,16 @@ const BrightBuyEcommerce = () => {
             setShowSignup(false);
             setCurrentPage('home');
           }}
+        />
+      )}
+
+      {showCheckout && (
+        <CheckoutModal
+          cartItems={cartItems}
+          setShowCheckout={setShowCheckout}
+          handlePlaceOrder={handleCheckout}
+          currentUser={currentUser}
+          getTotalPrice={getTotalPrice}
         />
       )}
 
