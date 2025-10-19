@@ -7,7 +7,7 @@ const ProductCard = ({ product, onView, onAddToCart, selectedVariant, setSelecte
       <img
         src={getImageUrl(product.ImageURL)}
         alt={product.ProductName}
-        className="w-full h-64 object-cover group-hover:scale-110 transition-transform duration-500"
+        className="w-full h-48 object-cover group-hover:scale-110 transition-transform duration-500"
         onError={(e) => handleImageError(e, product.ImageURL)}
         onLoad={() => handleImageLoad(product.ImageURL)}
       />
@@ -23,8 +23,8 @@ const ProductCard = ({ product, onView, onAddToCart, selectedVariant, setSelecte
         </span>
       </div>
     </div>
-    <div className="p-6 flex flex-col h-full">
-      <div className="flex items-center justify-between mb-2">
+    <div className="p-3 flex flex-col h-full">
+      <div className="flex items-center justify-between mb-0.5">
         <span className="text-sm font-medium text-blue-600 bg-blue-50 px-3 py-1 rounded-full">
           {product.Brand}
         </span>
@@ -35,15 +35,15 @@ const ProductCard = ({ product, onView, onAddToCart, selectedVariant, setSelecte
           <span className="text-sm text-gray-400">({product.reviews})</span>
         </div>
       </div>
-      <h3 className="font-bold text-lg mb-2 text-gray-800 group-hover:text-blue-600 transition-colors">
+      <h3 className="font-bold text-base mb-0.5 text-gray-800 group-hover:text-blue-600 transition-colors">
         {product.ProductName}
       </h3>
-      <p className="text-gray-600 text-sm mb-4 line-clamp-2">
+      <p className="text-gray-600 text-xs mb-2 line-clamp-1">
         {product.Description}
       </p>
       {/* Variant Selection */}
       {productVariants.length > 1 && (
-        <div className="mb-4 space-y-2">
+        <div className="mb-2 space-y-0.5">
           <div className="flex flex-wrap gap-2">
             {[...new Set(productVariants.map(v => v.Colour))].map(colour => (
               <button
@@ -89,7 +89,7 @@ const ProductCard = ({ product, onView, onAddToCart, selectedVariant, setSelecte
         </div>
       )}
       <div className="flex-1 flex flex-col justify-between">
-        <div className="flex flex-col mb-4">
+        <div className="flex flex-col mb-2">
           <span className="text-2xl font-bold text-green-600">
             LKR {currentPrice.toLocaleString()}
           </span>
@@ -99,17 +99,17 @@ const ProductCard = ({ product, onView, onAddToCart, selectedVariant, setSelecte
             </span>
           )}
         </div>
-        <div className="flex flex-col space-y-2">
+        <div className="flex flex-col space-y-1">
           <button
             onClick={() => onView(product)}
-            className="w-full bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2.5 rounded-lg transition-all duration-200 flex items-center justify-center space-x-2 border border-gray-200 hover:border-gray-300"
+            className="w-full bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2 rounded-lg transition-all duration-200 flex items-center justify-center space-x-2 border border-gray-200 hover:border-gray-300"
           >
             <span className="text-lg">👁</span>
             <span className="text-sm font-medium">View Details</span>
           </button>
           <button
             onClick={() => onAddToCart(product)}
-            className="w-full bg-gradient-to-r from-blue-500 to-purple-500 text-white px-4 py-2.5 rounded-lg hover:shadow-lg transform hover:scale-105 transition-all duration-300 flex items-center justify-center space-x-2 font-medium"
+            className="w-full bg-gradient-to-r from-blue-500 to-purple-500 text-white px-4 py-2 rounded-lg hover:shadow-lg transform hover:scale-105 transition-all duration-300 flex items-center justify-center space-x-2 font-medium"
           >
             <span className="text-lg">➕</span>
             <span>Add to Cart</span>
