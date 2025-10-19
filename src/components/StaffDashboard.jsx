@@ -29,7 +29,7 @@ const StaffDashboard = ({ currentUser, setCurrentUser, setCurrentPage }) => {
   const fetchProducts = async () => {
     try {
       const token = localStorage.getItem('token');
-      const res = await fetch('http://localhost:5000/staff/inventory/low-stock', {
+      const res = await fetch('http://localhost:5000/staff/inventory', {
         headers: { Authorization: `Bearer ${token}` }
       });
       const data = await res.json();
@@ -47,7 +47,7 @@ const StaffDashboard = ({ currentUser, setCurrentUser, setCurrentPage }) => {
 
   const pendingOrders = assignedOrders.filter(o => o.Status === 'pending').length;
   const completedOrders = assignedOrders.filter(o => o.Status === 'delivered').length;
-  const lowStockProducts = products; // Already filtered by backend
+  const lowStockProducts = products.filter(p => p.StockQuantity <= p.RecorderLevel);
 
   const stats = [
     { label: 'Assigned Orders', value: assignedOrders.length, icon: ShoppingCart, color: 'from-blue-500 to-blue-600' },

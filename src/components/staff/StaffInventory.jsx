@@ -41,7 +41,7 @@ const StaffInventory = ({ products, fetchProducts }) => {
   const handleReportLowStock = async () => {
     try {
       const token = localStorage.getItem('token');
-      const lowStockItems = products; // Already filtered by backend
+      const lowStockItems = products.filter(p => p.StockQuantity <= p.RecorderLevel);
       
       const res = await fetch('http://localhost:5000/staff/report-low-stock', {
         method: 'POST',
@@ -70,7 +70,7 @@ const StaffInventory = ({ products, fetchProducts }) => {
     p.Brand?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  const lowStockProducts = products; // Already filtered by backend
+  const lowStockProducts = products.filter(p => p.StockQuantity <= p.RecorderLevel);
 
   return (
     <div className="space-y-6">
@@ -84,6 +84,45 @@ const StaffInventory = ({ products, fetchProducts }) => {
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
           />
+        </div>
+        <div className="flex space-x-2">
+          <button
+            onClick={async () => {
+              try {
+                const token = localStorage.getItem('token');
+                const res = await fetch('http://localhost:5000/staff/inventory/debug', {
+                  headers: { Authorization: `Bearer ${token}` }
+                });
+                const data = await res.json();
+                alert(`Database Counts:\nProducts: ${data.totalProducts}\nVariants: ${data.totalVariants}\nInventory Items: ${data.inventoryItems}\nFrontend Showing: ${products.length}`);
+              } catch (err) {
+                console.error('Error getting debug info:', err);
+              }
+            }}
+            className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition whitespace-nowrap"
+          >
+            Debug Counts
+          </button>
+          <button
+            onClick={async () => {
+              try {
+                const token = localStorage.getItem('token');
+                const res = await fetch('http://localhost:5000/staff/inventory/test-low-stock', {
+                  method: 'POST',
+                  headers: { Authorization: `Bearer ${token}` }
+                });
+                if (res.ok) {
+                  alert('Test low stock data created! Refresh to see low stock items.');
+                  fetchProducts();
+                }
+              } catch (err) {
+                console.error('Error creating test data:', err);
+              }
+            }}
+            className="px-4 py-2 bg-yellow-500 text-white rounded-lg hover:bg-yellow-600 transition whitespace-nowrap"
+          >
+            Create Test Low Stock
+          </button>
         </div>
       </div>
 
