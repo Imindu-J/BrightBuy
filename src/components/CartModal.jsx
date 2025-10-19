@@ -35,7 +35,7 @@ const CartModal = ({ cartItems, setShowCart, updateQuantity, getTotalPrice, hand
                   <h3 className="font-semibold text-gray-800">{item.ProductName}</h3>
                   <p className="text-sm text-gray-600">{item.Brand}</p>
                   <p className="text-xs text-gray-500">{item.Colour} • {item.Size} • {item.Model}</p>
-                  <p className="text-lg font-bold text-green-600">${item.UnitPrice.toLocaleString()}</p>
+                  <p className="text-lg font-bold text-green-600">LKR {item.UnitPrice.toLocaleString()}</p>
                 </div>
                 <div className="flex items-center space-x-3">
                   <button
@@ -61,7 +61,7 @@ const CartModal = ({ cartItems, setShowCart, updateQuantity, getTotalPrice, hand
         <div className="border-t bg-gray-50 p-6">
           <div className="flex justify-between items-center mb-4">
             <span className="text-xl font-semibold">Total:</span>
-            <span className="text-2xl font-bold text-green-600">${getTotalPrice().toLocaleString()}</span>
+            <span className="text-2xl font-bold text-green-600">LKR {getTotalPrice().toLocaleString()}</span>
           </div>
           <button
             onClick={() => {

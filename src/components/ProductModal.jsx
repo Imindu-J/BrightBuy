@@ -101,11 +101,11 @@ const ProductModal = ({ selectedProduct, setSelectedProduct, addToCart, selected
                 <div className="flex items-center justify-between mb-4">
                   <div>
                     <span className="text-3xl font-bold text-green-600">
-                      ${currentPrice.toLocaleString()}
+                      LKR {currentPrice.toLocaleString()}
                     </span>
                     {currentPrice !== selectedProduct.Base_price && (
                       <span className="text-xl text-gray-400 line-through ml-3">
-                        ${selectedProduct.Base_price.toLocaleString()}
+                        LKR {selectedProduct.Base_price.toLocaleString()}
                       </span>
                     )}
                   </div>

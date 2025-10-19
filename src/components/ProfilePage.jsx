@@ -99,7 +99,7 @@ const ProfilePage = ({ currentUser, orderHistory, setCurrentPage, setCurrentUser
                       </div>
                       <div className="flex justify-between items-end">
                         <p className="text-sm text-gray-600">{order.items ? order.items.length : 0} item(s)</p>
-                        <p className="text-lg font-bold text-green-600">${order.TotalAmount.toLocaleString()}</p>
+                        <p className="text-lg font-bold text-green-600">LKR {order.TotalAmount.toLocaleString()}</p>
                       </div>
                     </div>
                   ))}

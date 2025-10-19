@@ -58,14 +58,14 @@ const CheckoutModal = ({
               {cartItems.map(item => (
                 <div key={`${item.CartID}-${item.VariantID}`} className="flex justify-between text-sm">
                   <span>{item.ProductName} ({item.Colour}, {item.Size})</span>
-                  <span>${(item.UnitPrice * item.Quantity).toLocaleString()}</span>
+                  <span>LKR {(item.UnitPrice * item.Quantity).toLocaleString()}</span>
                 </div>
               ))}
             </div>
             <div className="border-t pt-2 mt-2">
               <div className="flex justify-between font-semibold">
                 <span>Total:</span>
-                <span>${getTotalPrice().toLocaleString()}</span>
+                <span>LKR {getTotalPrice().toLocaleString()}</span>
               </div>
             </div>
           </div>
@@ -161,7 +161,7 @@ const CheckoutModal = ({
               loading ? "opacity-60 cursor-not-allowed" : ""
             }`}
           >
-            {loading ? "Placing Order..." : `Place Order - $${getTotalPrice().toLocaleString()}`}
+            {loading ? "Placing Order..." : `Place Order - LKR ${getTotalPrice().toLocaleString()}`}
           </button>
           </form>
         </div>
