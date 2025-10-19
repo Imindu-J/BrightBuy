@@ -2,7 +2,7 @@ DELIMITER $$
 
 -- Update stock after order placement
 CREATE TRIGGER decrement_stock_after_order
-AFTER INSERT ON OrderItems
+AFTER INSERT ON order_item
 FOR EACH ROW
 BEGIN
     UPDATE Variant
@@ -23,14 +23,14 @@ END$$
 
 -- Auto-calculate order total
 CREATE TRIGGER calculate_order_total
-BEFORE INSERT ON Orders
+BEFORE INSERT ON customer_order
 FOR EACH ROW
 BEGIN
     DECLARE total DECIMAL(10,2);
 
     SELECT SUM(oi.Quantity * v.Variant_Price)
     INTO total
-    FROM OrderItems oi
+    FROM order_item oi
     JOIN Variant v ON oi.VariantID = v.VariantID
     WHERE oi.OrderID = NEW.OrderID;
 
@@ -38,12 +38,12 @@ BEGIN
 END$$
 
 -- Audit log for order insertions
-CREATE TRIGGER audit_order_changes
-AFTER INSERT ON Orders
-FOR EACH ROW
-BEGIN
-    INSERT INTO OrderAudit (OrderID, Action, ActionTime)
-    VALUES (NEW.OrderID, 'INSERT', NOW());
-END$$
+-- CREATE TRIGGER audit_order_changes
+-- AFTER INSERT ON Orders
+-- FOR EACH ROW
+-- BEGIN
+--     INSERT INTO OrderAudit (OrderID, Action, ActionTime)
+--     VALUES (NEW.OrderID, 'INSERT', NOW());
+-- END$$
 
 DELIMITER ;
