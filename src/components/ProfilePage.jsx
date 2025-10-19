@@ -8,6 +8,22 @@ const ProfilePage = ({ currentUser, orderHistory, setCurrentPage, setCurrentUser
     }
   }, [loadOrderHistory]);
 
+  // Helper function to format date to "Month Year" format
+  const formatDateToMonthYear = (dateString) => {
+    if (!dateString) return 'Unknown';
+    const date = new Date(dateString);
+    return date.toLocaleDateString('en-US', { 
+      year: 'numeric', 
+      month: 'long' 
+    });
+  };
+
+  // Helper function to capitalize role
+  const capitalizeRole = (role) => {
+    if (!role) return 'User';
+    return role.charAt(0).toUpperCase() + role.slice(1);
+  };
+
   return (
   <div className="container mx-auto px-4 py-8">
     <div className="max-w-4xl mx-auto">
@@ -20,7 +36,9 @@ const ProfilePage = ({ currentUser, orderHistory, setCurrentPage, setCurrentUser
             <div>
               <h1 className="text-3xl font-bold">{currentUser?.UserName}</h1>
               <p className="text-blue-100">{currentUser?.Email}</p>
-              <p className="text-sm text-blue-200">Customer since January 2024</p>
+              <p className="text-sm text-blue-200">
+                {capitalizeRole(currentUser?.Role)} since {formatDateToMonthYear(currentUser?.CreatedAt)}
+              </p>
             </div>
           </div>
         </div>
