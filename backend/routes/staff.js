@@ -95,6 +95,33 @@ router.get('/orders/:orderId', authorize(['staff']), async (req, res) => {
   }
 });
 
+// Get all inventory (variants)
+router.get('/inventory', authorize(['staff']), async (req, res) => {
+  try {
+    const [variants] = await db.query(`
+      SELECT 
+        p.ProductID,
+        p.ProductName,
+        p.Brand,
+        v.VariantID,
+        v.Colour,
+        v.Size,
+        v.Model,
+        v.StockQuantity,
+        v.RecorderLevel,
+        v.Status
+      FROM Product p
+      INNER JOIN Variant v ON p.ProductID = v.ProductID
+      ORDER BY p.ProductName, v.Colour, v.Size, v.Model
+    `);
+    console.log(`Found ${variants.length} variants in inventory`);
+    res.json(variants);
+  } catch (err) {
+    console.error('Error fetching inventory:', err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
 // Get low stock products
 router.get('/inventory/low-stock', authorize(['staff']), async (req, res) => {
   try {
@@ -135,6 +162,43 @@ router.put('/inventory/:variantId/stock', authorize(['staff']), async (req, res)
       [stockQuantity, variantId]
     );
     res.json({ message: 'Stock updated successfully' });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Debug endpoint to check database counts
+router.get('/inventory/debug', authorize(['staff']), async (req, res) => {
+  try {
+    const [productCount] = await db.query('SELECT COUNT(*) as count FROM Product');
+    const [variantCount] = await db.query('SELECT COUNT(*) as count FROM Variant');
+    const [inventoryCount] = await db.query(`
+      SELECT COUNT(*) as count 
+      FROM Product p 
+      INNER JOIN Variant v ON p.ProductID = v.ProductID
+    `);
+    
+    res.json({
+      totalProducts: productCount[0].count,
+      totalVariants: variantCount[0].count,
+      inventoryItems: inventoryCount[0].count
+    });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Test endpoint to create some low stock items for testing
+router.post('/inventory/test-low-stock', authorize(['staff']), async (req, res) => {
+  try {
+    // Update a few variants to have low stock for testing
+    await db.query(`
+      UPDATE Variant 
+      SET StockQuantity = 2 
+      WHERE VariantID IN (1, 2, 3)
+    `);
+    
+    res.json({ message: 'Test low stock data created successfully' });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
