@@ -27,6 +27,7 @@ app.use('/images', express.static('public/images'));
 // Route Imports
 const authRoutes = require('./routes/auth');
 const adminRoutes = require('./routes/admin');
+const staffRoutes = require('./routes/staff');
 const productRoutes = require('./routes/products');
 const categoryRoutes = require('./routes/categories');
 const variantRoutes = require('./routes/variants');
@@ -44,6 +45,7 @@ app.use('/variants', variantRoutes);
 
 // Protected Routes (require login and role checks)
 app.use('/admin', authorize(['admin']), adminRoutes);
+app.use('/staff', authorize(['staff']), staffRoutes);
 app.use('/order', authorize(['customer', 'staff', 'admin']), orderRoutes);
 app.use('/cart', authorize(['customer']), cartRoutes);
 app.use('/delivery', authorize(['staff', 'admin']), deliveryRoutes);
