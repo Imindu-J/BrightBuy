@@ -39,8 +39,6 @@ router.get('/', authorize(['customer']), async (req, res) => {
 router.post('/add', authorize(['customer']), async (req, res) => {
   const { variantId, quantity } = req.body;
   
-  console.log('Add to cart request:', { variantId, quantity, userId: req.user.id });
-  
   if (!variantId || !quantity || quantity <= 0) {
     return res.status(400).json({ error: 'Invalid variant ID or quantity' });
   }
