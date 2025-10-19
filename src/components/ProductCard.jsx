@@ -2,7 +2,7 @@ import React from 'react';
 import { getImageUrl, handleImageError, handleImageLoad } from '../utils/imageUtils';
 
 const ProductCard = ({ product, onView, onAddToCart, selectedVariant, setSelectedVariant, productVariants, currentPrice }) => (
-  <div className="bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-500 transform hover:-translate-y-2 overflow-hidden group">
+  <div className="bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-500 transform hover:-translate-y-2 overflow-hidden group h-full flex flex-col">
     <div className="relative overflow-hidden">
       <img
         src={getImageUrl(product.ImageURL)}
@@ -23,7 +23,7 @@ const ProductCard = ({ product, onView, onAddToCart, selectedVariant, setSelecte
         </span>
       </div>
     </div>
-    <div className="p-6">
+    <div className="p-6 flex flex-col h-full">
       <div className="flex items-center justify-between mb-2">
         <span className="text-sm font-medium text-blue-600 bg-blue-50 px-3 py-1 rounded-full">
           {product.Brand}
@@ -88,8 +88,8 @@ const ProductCard = ({ product, onView, onAddToCart, selectedVariant, setSelecte
           </div>
         </div>
       )}
-      <div className="flex items-center justify-between">
-        <div className="flex flex-col">
+      <div className="flex-1 flex flex-col justify-between">
+        <div className="flex flex-col mb-4">
           <span className="text-2xl font-bold text-green-600">
             LKR {currentPrice.toLocaleString()}
           </span>
@@ -99,21 +99,20 @@ const ProductCard = ({ product, onView, onAddToCart, selectedVariant, setSelecte
             </span>
           )}
         </div>
-        <div className="flex space-x-2">
+        <div className="flex flex-col space-y-2">
           <button
             onClick={() => onView(product)}
-            className="p-2 bg-gray-100 hover:bg-gray-200 rounded-full transition-colors"
+            className="w-full bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2.5 rounded-lg transition-all duration-200 flex items-center justify-center space-x-2 border border-gray-200 hover:border-gray-300"
           >
-            {/* Eye icon here if needed */}
-            <span>👁</span>
+            <span className="text-lg">👁</span>
+            <span className="text-sm font-medium">View Details</span>
           </button>
           <button
             onClick={() => onAddToCart(product)}
-            className="bg-gradient-to-r from-blue-500 to-purple-500 text-white px-6 py-2 rounded-full hover:shadow-lg transform hover:scale-105 transition-all duration-300 flex items-center space-x-2"
+            className="w-full bg-gradient-to-r from-blue-500 to-purple-500 text-white px-4 py-2.5 rounded-lg hover:shadow-lg transform hover:scale-105 transition-all duration-300 flex items-center justify-center space-x-2 font-medium"
           >
-            {/* Plus icon here if needed */}
-            <span>＋</span>
-            <span className="font-medium">Add to Cart</span>
+            <span className="text-lg">＋</span>
+            <span>Add to Cart</span>
           </button>
         </div>
       </div>
