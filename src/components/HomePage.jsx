@@ -20,7 +20,7 @@ const HomePage = ({ categories, setSelectedCategory, filteredProducts, ProductCa
               Shop Smartphones
             </button>
             <button 
-              onClick={() => setSelectedCategory('3')}
+              onClick={() => setSelectedCategory('2')}
               className="bg-gradient-to-r from-yellow-400 to-orange-500 text-white px-8 py-4 rounded-full font-bold hover:shadow-xl transform hover:scale-105 transition-all duration-300"
             >
               Explore Laptops
