@@ -146,15 +146,24 @@ const UserManagement = ({ users, fetchUsers }) => {
                   <td className="px-6 py-4 text-gray-600">{user.Email}</td>
                   <td className="px-6 py-4 text-gray-600">{user.PhoneNumber || 'N/A'}</td>
                   <td className="px-6 py-4">
-                    <select
-                      value={user.Role || 'Customer'}
-                      onChange={(e) => handleRoleChange(user.UserID, e.target.value)}
-                      className="px-3 py-1 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500"
-                    >
-                      <option value="Customer">Customer</option>
-                      <option value="Staff">Staff</option>
-                      <option value="Admin">Admin</option>
-                    </select>
+                    {(() => {
+                      const rawRole = user.Role ?? user.role ?? 'Customer';
+                      const label = String(rawRole).toLowerCase() === 'admin'
+                        ? 'Admin'
+                        : String(rawRole).toLowerCase() === 'staff'
+                          ? 'Staff'
+                          : 'Customer';
+                      const style = label === 'Admin'
+                        ? 'bg-purple-100 text-purple-800'
+                        : label === 'Staff'
+                          ? 'bg-blue-100 text-blue-800'
+                          : 'bg-gray-100 text-gray-800';
+                      return (
+                        <span className={`px-3 py-1 rounded-full text-xs font-medium ${style}`}>
+                          {label}
+                        </span>
+                      );
+                    })()}
                   </td>
                   <td className="px-6 py-4">
                     <button
