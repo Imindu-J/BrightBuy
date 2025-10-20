@@ -11,12 +11,14 @@ const AdminDashboard = ({ currentUser, setCurrentUser, setCurrentPage }) => {
   const [users, setUsers] = useState([]);
   const [orders, setOrders] = useState([]);
   const [categories, setCategories] = useState([]);
+  const [variants, setVariants] = useState([]);
 
   useEffect(() => {
     fetchProducts();
     fetchUsers();
     fetchOrders();
     fetchCategories();
+    fetchVariants();
   }, []);
 
   const fetchProducts = async () => {
@@ -65,14 +67,40 @@ const AdminDashboard = ({ currentUser, setCurrentUser, setCurrentPage }) => {
     }
   };
 
+  const fetchVariants = async () => {
+    try {
+      const res = await fetch('http://localhost:5000/products/variants');
+      const data = await res.json();
+      setVariants(data);
+    } catch (err) {
+      console.error('Error fetching variants:', err);
+    }
+  };
+
   const handleLogout = () => {
     localStorage.removeItem('token');
     setCurrentUser(null);
     setCurrentPage('home');
   };
 
+  // Aggregate stock by ProductID from variants
+  const stockByProduct = variants.reduce((acc, v) => {
+    const pid = v.ProductID ?? v.productId ?? v.ProductId;
+    const qty = (v.StockQuantity ?? v.stockQuantity ?? v.stock ?? v.Variant_Quantity ?? 0) || 0;
+    acc[pid] = (acc[pid] || 0) + qty;
+    return acc;
+  }, {});
+
+  const productsWithStock = products.map(p => {
+    const id = p.ProductID ?? p.productId ?? p.ProductId;
+    return {
+      ...p,
+      Stock: stockByProduct[id] || 0
+    };
+  });
+
   const stats = [
-    { label: 'Total Products', value: products.length, icon: Package, color: 'from-blue-500 to-blue-600' },
+    { label: 'Total Products', value: productsWithStock.length, icon: Package, color: 'from-blue-500 to-blue-600' },
     { label: 'Total Users', value: users.length, icon: Users, color: 'from-green-500 to-green-600' },
     { label: 'Total Orders', value: orders.length, icon: ShoppingCart, color: 'from-purple-500 to-purple-600' },
     { label: 'Pending Orders', value: orders.filter(o => o.Status === 'pending').length, icon: Clock, color: 'from-orange-500 to-orange-600' }
@@ -144,9 +172,10 @@ const AdminDashboard = ({ currentUser, setCurrentUser, setCurrentPage }) => {
         <div>
           {activeTab === 'products' && (
             <ProductManagement 
-              products={products}
+              products={productsWithStock}
               categories={categories}
               fetchProducts={fetchProducts}
+              fetchCategories={fetchCategories}
             />
           )}
           {activeTab === 'users' && (
@@ -164,7 +193,7 @@ const AdminDashboard = ({ currentUser, setCurrentUser, setCurrentPage }) => {
           )}
           {activeTab === 'reports' && (
             <Reports 
-              products={products}
+              products={productsWithStock}
               orders={orders}
             />
           )}

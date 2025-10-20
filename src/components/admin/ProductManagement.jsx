@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Plus, Edit, Trash2, Search, AlertTriangle, X, Upload } from 'lucide-react';
 import { getImageUrl, handleImageError, handleImageLoad } from '../../utils/imageUtils';
 
-const ProductManagement = ({ products, categories, fetchProducts }) => {
+const ProductManagement = ({ products, categories, fetchProducts, fetchCategories }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [showModal, setShowModal] = useState(false);
   const [modalType, setModalType] = useState('');
@@ -16,17 +16,29 @@ const ProductManagement = ({ products, categories, fetchProducts }) => {
     Stock: '',
     ImageURL: ''
   });
+  const [showCategoryModal, setShowCategoryModal] = useState(false);
+  const [newCategory, setNewCategory] = useState({ name: '', description: '', parentId: '' });
 
   const handleAddProduct = async () => {
     try {
       const token = localStorage.getItem('token');
-      const res = await fetch('http://localhost:5000/admin/products', {
+      // Backend expects name, description, brand, price, categoryId, sku, imageURL at /products (POST)
+      const payload = {
+        name: formData.ProductName,
+        description: formData.Description,
+        brand: formData.Brand,
+        price: Number(formData.Base_price),
+        categoryId: formData.CategoryID,
+        sku: formData.SKU || '',
+        imageURL: formData.ImageURL
+      };
+      const res = await fetch('http://localhost:5000/products', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${token}`
         },
-        body: JSON.stringify(formData)
+        body: JSON.stringify(payload)
       });
       if (res.ok) {
         alert('Product added successfully!');
@@ -43,13 +55,23 @@ const ProductManagement = ({ products, categories, fetchProducts }) => {
   const handleUpdateProduct = async () => {
     try {
       const token = localStorage.getItem('token');
+      // Assuming a PUT endpoint exists; if not, this can be adjusted later
+      const payload = {
+        name: formData.ProductName,
+        description: formData.Description,
+        brand: formData.Brand,
+        price: Number(formData.Base_price),
+        categoryId: formData.CategoryID,
+        sku: formData.SKU || '',
+        imageURL: formData.ImageURL
+      };
       const res = await fetch(`http://localhost:5000/admin/products/${selectedProduct.ProductID}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${token}`
         },
-        body: JSON.stringify(formData)
+        body: JSON.stringify(payload)
       });
       if (res.ok) {
         alert('Product updated successfully!');
@@ -88,7 +110,8 @@ const ProductManagement = ({ products, categories, fetchProducts }) => {
       CategoryID: '',
       Base_price: '',
       Stock: '',
-      ImageURL: ''
+      ImageURL: '',
+      SKU: ''
     });
     setSelectedProduct(null);
   };
@@ -102,10 +125,45 @@ const ProductManagement = ({ products, categories, fetchProducts }) => {
       CategoryID: product.CategoryID,
       Base_price: product.Base_price,
       Stock: product.Stock || 0,
-      ImageURL: product.ImageURL
+      ImageURL: product.ImageURL,
+      SKU: product.SKU || ''
     });
     setModalType('edit');
     setShowModal(true);
+  };
+
+  const handleAddCategory = async (e) => {
+    e.preventDefault();
+    try {
+      const token = localStorage.getItem('token');
+      const res = await fetch('http://localhost:5000/categories', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          name: newCategory.name,
+          description: newCategory.description,
+          parentId: newCategory.parentId || null
+        })
+      });
+      if (res.ok) {
+        const data = await res.json();
+        alert('Category added successfully!');
+        setShowCategoryModal(false);
+        setNewCategory({ name: '', description: '', parentId: '' });
+        if (fetchCategories) fetchCategories();
+        // preselect newly created category if returned
+        if (data?.id) setFormData({ ...formData, CategoryID: String(data.id) });
+      } else {
+        const err = await res.json();
+        alert(err.error || 'Failed to add category');
+      }
+    } catch (err) {
+      console.error('Error adding category:', err);
+      alert('Failed to add category');
+    }
   };
 
   const filteredProducts = products.filter(p =>
@@ -250,22 +308,38 @@ const ProductManagement = ({ products, categories, fetchProducts }) => {
                 value={formData.Description}
                 onChange={(e) => setFormData({...formData, Description: e.target.value})}
               />
-              <select
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-                value={formData.CategoryID}
-                onChange={(e) => setFormData({...formData, CategoryID: e.target.value})}
-              >
-                <option value="">Select Category</option>
-                {categories.map(cat => (
-                  <option key={cat.CategoryID} value={cat.CategoryID}>{cat.CategoryName}</option>
-                ))}
-              </select>
+              <div className="grid grid-cols-3 gap-3 items-start">
+                <select
+                  className="col-span-2 w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                  value={formData.CategoryID}
+                  onChange={(e) => setFormData({...formData, CategoryID: e.target.value})}
+                >
+                  <option value="">Select Category</option>
+                  {categories.map(cat => (
+                    <option key={cat.CategoryID} value={cat.CategoryID}>{cat.CategoryName}</option>
+                  ))}
+                </select>
+                <button
+                  type="button"
+                  onClick={() => setShowCategoryModal(true)}
+                  className="w-full bg-white border border-gray-300 rounded-lg px-3 py-2 text-sm hover:bg-gray-50"
+                >
+                  + Add new category
+                </button>
+              </div>
               <input
                 type="number"
                 placeholder="Base Price (LKR)"
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
                 value={formData.Base_price}
                 onChange={(e) => setFormData({...formData, Base_price: e.target.value})}
+              />
+              <input
+                type="text"
+                placeholder="SKU (optional)"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                value={formData.SKU || ''}
+                onChange={(e) => setFormData({ ...formData, SKU: e.target.value })}
               />
               <input
                 type="number"
@@ -291,6 +365,62 @@ const ProductManagement = ({ products, categories, fetchProducts }) => {
                 {modalType === 'add' ? 'Add Product' : 'Save Changes'}
               </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Add Category Modal */}
+      {showCategoryModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl w-full max-w-md">
+            <div className="bg-gradient-to-r from-blue-500 to-purple-500 text-white p-6">
+              <div className="flex justify-between items-center">
+                <h2 className="text-2xl font-bold">Add New Category</h2>
+                <button onClick={() => setShowCategoryModal(false)} className="hover:bg-white/20 p-2 rounded-full">
+                  <X size={24} />
+                </button>
+              </div>
+            </div>
+            <form onSubmit={handleAddCategory} className="p-6 space-y-4">
+              <div>
+                <label className="block text-gray-700 font-medium mb-2">Category Name</label>
+                <input
+                  type="text"
+                  value={newCategory.name}
+                  onChange={(e) => setNewCategory({ ...newCategory, name: e.target.value })}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                  required
+                />
+              </div>
+              <div>
+                <label className="block text-gray-700 font-medium mb-2">Description</label>
+                <textarea
+                  value={newCategory.description}
+                  onChange={(e) => setNewCategory({ ...newCategory, description: e.target.value })}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                  rows="3"
+                />
+              </div>
+              <div>
+                <label className="block text-gray-700 font-medium mb-2">Parent Category (optional)</label>
+                <select
+                  value={newCategory.parentId}
+                  onChange={(e) => setNewCategory({ ...newCategory, parentId: e.target.value })}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                >
+                  <option value="">None</option>
+                  {categories.map(cat => (
+                    <option key={cat.CategoryID} value={cat.CategoryID}>{cat.CategoryName}</option>
+                  ))}
+                </select>
+              </div>
+              <button
+                type="submit"
+                className="w-full bg-gradient-to-r from-blue-500 to-purple-500 text-white font-bold py-3 rounded-lg hover:shadow-lg transition"
+              >
+                Add Category
+              </button>
+            </form>
           </div>
         </div>
       )}
