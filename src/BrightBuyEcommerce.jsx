@@ -227,7 +227,15 @@ const BrightBuyEcommerce = () => {
     try {
       const token = localStorage.getItem('token');
       console.log('Token from localStorage:', token ? 'Present' : 'Missing');
+      console.log('Token value:', token);
       console.log('Adding to cart:', { variantId: variant.VariantID, quantity: 1 });
+      
+      if (!token) {
+        alert('Please login again - your session has expired');
+        setShowLogin(true);
+        setCurrentUser(null);
+        return;
+      }
       
       await addToCartAPI(variant.VariantID, 1, token);
       
@@ -239,7 +247,16 @@ const BrightBuyEcommerce = () => {
     } catch (error) {
       console.error('Error adding to cart:', error);
       console.error('Error response:', error.response?.data);
-      alert(error.response?.data?.error || 'Failed to add item to cart');
+      
+      // If token is invalid, ask user to login again
+      if (error.response?.status === 403 || error.response?.status === 401) {
+        localStorage.removeItem('token');
+        setCurrentUser(null);
+        setShowLogin(true);
+        alert('Your session has expired. Please login again.');
+      } else {
+        alert(error.response?.data?.error || 'Failed to add item to cart');
+      }
     }
   };
 
