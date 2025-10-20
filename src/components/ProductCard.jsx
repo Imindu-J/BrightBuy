@@ -18,8 +18,12 @@ const ProductCard = ({ product, onView, onAddToCart, selectedVariant, setSelecte
         </button>
       </div>
       <div className="absolute top-4 left-4">
-        <span className="bg-gradient-to-r from-green-400 to-blue-500 text-white px-3 py-1 rounded-full text-sm font-medium">
-          In Stock
+        <span className={`px-3 py-1 rounded-full text-sm font-medium ${
+          productVariants.length === 0
+            ? 'bg-gradient-to-r from-red-400 to-red-500 text-white'
+            : 'bg-gradient-to-r from-green-400 to-blue-500 text-white'
+        }`}>
+          {productVariants.length === 0 ? 'Out of Stock' : 'In Stock'}
         </span>
       </div>
     </div>
@@ -42,50 +46,96 @@ const ProductCard = ({ product, onView, onAddToCart, selectedVariant, setSelecte
         {product.Description}
       </p>
       {/* Variant Selection */}
-      {productVariants.length > 1 && (
-        <div className="mb-2 space-y-0.5">
-          <div className="flex flex-wrap gap-2">
-            {[...new Set(productVariants.map(v => v.Colour))].map(colour => (
-              <button
-                key={colour}
-                onClick={() => setSelectedVariant({
-                  ...selectedVariant,
-                  [product.ProductID]: {
-                    ...selectedVariant[product.ProductID],
-                    Colour: colour
-                  }
-                })}
-                className={`px-3 py-1 rounded-full text-xs font-medium transition-all ${
-                  (selectedVariant[product.ProductID]?.Colour || productVariants[0].Colour) === colour
-                    ? 'bg-blue-500 text-white'
-                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                }`}
-              >
-                {colour}
-              </button>
-            ))}
-          </div>
-          <div className="flex flex-wrap gap-2">
-            {[...new Set(productVariants.map(v => v.Size))].map(size => (
-              <button
-                key={size}
-                onClick={() => setSelectedVariant({
-                  ...selectedVariant,
-                  [product.ProductID]: {
-                    ...selectedVariant[product.ProductID],
-                    Size: size
-                  }
-                })}
-                className={`px-3 py-1 rounded-full text-xs font-medium transition-all ${
-                  (selectedVariant[product.ProductID]?.Size || productVariants[0].Size) === size
-                    ? 'bg-purple-500 text-white'
-                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                }`}
-              >
-                {size}
-              </button>
-            ))}
-          </div>
+      {productVariants.length > 0 && (
+        <div className="mb-2 space-y-1">
+          {/* Color Selection */}
+          {[...new Set(productVariants.map(v => v.Colour))].length > 1 && (
+            <div className="flex flex-wrap gap-1">
+              {[...new Set(productVariants.map(v => v.Colour))].map(colour => (
+                <button
+                  key={colour}
+                  onClick={() => {
+                    const currentSelected = selectedVariant[product.ProductID] || {};
+                    setSelectedVariant({
+                      ...selectedVariant,
+                      [product.ProductID]: {
+                        ...currentSelected,
+                        Colour: colour,
+                        // Reset Size and Model when color changes to ensure valid combination
+                        Size: currentSelected.Size || productVariants.find(v => v.Colour === colour)?.Size,
+                        Model: currentSelected.Model || productVariants.find(v => v.Colour === colour)?.Model
+                      }
+                    });
+                  }}
+                  className={`px-2 py-1 rounded-full text-xs font-medium transition-all ${
+                    (selectedVariant[product.ProductID]?.Colour || productVariants[0].Colour) === colour
+                      ? 'bg-blue-500 text-white'
+                      : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                  }`}
+                >
+                  {colour}
+                </button>
+              ))}
+            </div>
+          )}
+          
+          {/* Size Selection */}
+          {[...new Set(productVariants.map(v => v.Size))].length > 1 && (
+            <div className="flex flex-wrap gap-1">
+              {[...new Set(productVariants.map(v => v.Size))].map(size => (
+                <button
+                  key={size}
+                  onClick={() => {
+                    const currentSelected = selectedVariant[product.ProductID] || {};
+                    setSelectedVariant({
+                      ...selectedVariant,
+                      [product.ProductID]: {
+                        ...currentSelected,
+                        Size: size,
+                        // Reset Model when size changes to ensure valid combination
+                        Model: currentSelected.Model || productVariants.find(v => v.Size === size)?.Model
+                      }
+                    });
+                  }}
+                  className={`px-2 py-1 rounded-full text-xs font-medium transition-all ${
+                    (selectedVariant[product.ProductID]?.Size || productVariants[0].Size) === size
+                      ? 'bg-purple-500 text-white'
+                      : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                  }`}
+                >
+                  {size}
+                </button>
+              ))}
+            </div>
+          )}
+          
+          {/* Model Selection - only show if there are multiple models */}
+          {[...new Set(productVariants.map(v => v.Model))].length > 1 && (
+            <div className="flex flex-wrap gap-1">
+              {[...new Set(productVariants.map(v => v.Model))].map(model => (
+                <button
+                  key={model}
+                  onClick={() => {
+                    const currentSelected = selectedVariant[product.ProductID] || {};
+                    setSelectedVariant({
+                      ...selectedVariant,
+                      [product.ProductID]: {
+                        ...currentSelected,
+                        Model: model
+                      }
+                    });
+                  }}
+                  className={`px-2 py-1 rounded-full text-xs font-medium transition-all ${
+                    (selectedVariant[product.ProductID]?.Model || productVariants[0].Model) === model
+                      ? 'bg-green-500 text-white'
+                      : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                  }`}
+                >
+                  {model}
+                </button>
+              ))}
+            </div>
+          )}
         </div>
       )}
       <div className="flex-1 flex flex-col justify-between">
@@ -93,9 +143,9 @@ const ProductCard = ({ product, onView, onAddToCart, selectedVariant, setSelecte
           <span className="text-2xl font-bold text-green-600">
             LKR {currentPrice.toLocaleString()}
           </span>
-          {currentPrice !== product.Base_price && (
+          {parseFloat(currentPrice) !== parseFloat(product.Base_price) && (
             <span className="text-sm text-gray-400 line-through">
-              LKR {product.Base_price.toLocaleString()}
+              LKR {parseFloat(product.Base_price).toLocaleString()}
             </span>
           )}
         </div>
@@ -109,10 +159,15 @@ const ProductCard = ({ product, onView, onAddToCart, selectedVariant, setSelecte
           </button>
           <button
             onClick={() => onAddToCart(product)}
-            className="w-full bg-gradient-to-r from-blue-500 to-purple-500 text-white px-4 py-2 rounded-lg hover:shadow-lg transform hover:scale-105 transition-all duration-300 flex items-center justify-center space-x-2 font-medium"
+            disabled={productVariants.length === 0}
+            className={`w-full px-4 py-2 rounded-lg transition-all duration-300 flex items-center justify-center space-x-2 font-medium ${
+              productVariants.length === 0
+                ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                : 'bg-gradient-to-r from-blue-500 to-purple-500 text-white hover:shadow-lg transform hover:scale-105'
+            }`}
           >
-            <span className="text-lg">➕</span>
-            <span>Add to Cart</span>
+            <span className="text-lg">{productVariants.length === 0 ? '❌' : '➕'}</span>
+            <span>{productVariants.length === 0 ? 'Out of Stock' : 'Add to Cart'}</span>
           </button>
         </div>
       </div>

@@ -1,6 +1,6 @@
 import React from 'react';
 
-const HomePage = ({ categories, setSelectedCategory, filteredProducts, ProductCard, productCardProps, selectedCategory, searchTerm, isFiltered }) => (
+const HomePage = ({ categories, setSelectedCategory, filteredProducts, ProductCard, productCardProps, selectedCategory, searchTerm, isFiltered, sortOrder, setSortOrder }) => (
   <div>
     {/* Hero Section - Only show when no filters are active */}
     {!isFiltered && (
@@ -71,6 +71,18 @@ const HomePage = ({ categories, setSelectedCategory, filteredProducts, ProductCa
               'All Products'
             )}
           </h2>
+          <div className="flex items-center space-x-3">
+            <label className="text-sm text-gray-600">Sort:</label>
+            <select
+              value={sortOrder}
+              onChange={(e) => setSortOrder(e.target.value)}
+              className="border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500"
+            >
+              <option value="none">Relevance</option>
+              <option value="price_asc">Price: Low to High</option>
+              <option value="price_desc">Price: High to Low</option>
+            </select>
+          </div>
         </div>
         {filteredProducts.length === 0 ? (
           <div className="text-center py-16">

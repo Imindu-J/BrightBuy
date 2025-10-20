@@ -35,6 +35,7 @@ const BrightBuyEcommerce = () => {
   const [variants, setVariants] = useState([]);
   const [searchResults, setSearchResults] = useState([]);
   const [isSearching, setIsSearching] = useState(false);
+  const [sortOrder, setSortOrder] = useState('none'); // 'none' | 'price_asc' | 'price_desc'
 
   // Fetch categories
   useEffect(() => {
@@ -145,23 +146,25 @@ const BrightBuyEcommerce = () => {
     const product = products.find(p => p.ProductID === productId);
     const selected = selectedVariant[productId];
     
-    
+    // If we have a selected variant, try to find the exact match
     if (selected && productVariants.length > 0) {
       const variant = productVariants.find(v =>
         v.Colour === selected.Colour &&
         v.Size === selected.Size &&
         v.Model === selected.Model
       );
-      return variant ? variant.Variant_Price : productVariants[0].Variant_Price;
+      if (variant) {
+        return parseFloat(variant.Variant_Price);
+      }
     }
     
     // Fallback to first variant price or product base price
     if (productVariants.length > 0) {
-      return productVariants[0].Variant_Price;
+      return parseFloat(productVariants[0].Variant_Price);
     }
     
     // Final fallback to product base price
-    return product?.Base_price || 0;
+    return parseFloat(product?.Base_price) || 0;
   };
 
   // Enhanced search function with fuzzy matching
@@ -193,15 +196,37 @@ const BrightBuyEcommerce = () => {
   };
 
   // Use search results if available, otherwise use local filtering
-  const filteredProducts = searchTerm.trim() 
-    ? searchResults.filter(product => {
-        const matchesCategory = selectedCategory === 'all' || product.CategoryID === parseInt(selectedCategory);
-        return matchesCategory;
-      })
-    : products.filter(product => {
-        const matchesCategory = selectedCategory === 'all' || product.CategoryID === parseInt(selectedCategory);
-        return matchesCategory;
-      });
+  const filteredProducts = (() => {
+    const base = searchTerm.trim()
+      ? searchResults.filter(product => {
+          const matchesCategory = selectedCategory === 'all' || product.CategoryID === parseInt(selectedCategory);
+          return matchesCategory;
+        })
+      : products.filter(product => {
+          const matchesCategory = selectedCategory === 'all' || product.CategoryID === parseInt(selectedCategory);
+          return matchesCategory;
+        });
+
+    if (sortOrder === 'none') return base;
+
+    const getDisplayPrice = (product) => {
+      const variantsForProduct = variants.filter(v => v.ProductID === product.ProductID);
+      if (variantsForProduct.length > 0) {
+        return variantsForProduct[0].Variant_Price ?? product.Base_price ?? 0;
+      }
+      return product.Base_price ?? 0;
+    };
+
+    const sorted = [...base].sort((a, b) => {
+      const priceA = getDisplayPrice(a);
+      const priceB = getDisplayPrice(b);
+      if (sortOrder === 'price_asc') return priceA - priceB;
+      if (sortOrder === 'price_desc') return priceB - priceA;
+      return 0;
+    });
+
+    return sorted;
+  })();
 
   // Determine if any filters are active
   const isFiltered = searchTerm.trim() !== '' || selectedCategory !== 'all';
@@ -220,6 +245,13 @@ const BrightBuyEcommerce = () => {
     }
 
     const productVariants = getProductVariants(product.ProductID);
+    
+    // Handle products without variants
+    if (productVariants.length === 0) {
+      alert('This product is out of stock');
+      return;
+    }
+    
     const selectedVar = selectedVariant[product.ProductID] || productVariants[0];
     const variant = productVariants.find(v =>
       v.Colour === selectedVar.Colour &&
@@ -436,6 +468,8 @@ const BrightBuyEcommerce = () => {
             selectedCategory={selectedCategory}
             searchTerm={searchTerm}
             isFiltered={isFiltered}
+            sortOrder={sortOrder}
+            setSortOrder={setSortOrder}
           />
         </div>
       )}

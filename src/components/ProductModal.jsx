@@ -50,54 +50,103 @@ const ProductModal = ({ selectedProduct, setSelectedProduct, addToCart, selected
               {/* Variant Selection */}
               {productVariants.length > 1 && (
                 <div className="space-y-4">
-                  <div>
-                    <h3 className="font-semibold text-gray-800 mb-2">Color</h3>
-                    <div className="flex flex-wrap gap-2">
-                      {[...new Set(productVariants.map(v => v.Colour))].map(colour => (
-                        <button
-                          key={colour}
-                          onClick={() => setSelectedVariant({
-                            ...selectedVariant,
-                            [selectedProduct.ProductID]: {
-                              ...selectedVariant[selectedProduct.ProductID],
-                              Colour: colour
-                            }
-                          })}
-                          className={`px-4 py-2 rounded-lg font-medium transition-all ${
-                            (selectedVariant[selectedProduct.ProductID]?.Colour || productVariants[0].Colour) === colour
-                              ? 'bg-blue-500 text-white shadow-lg'
-                              : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                          }`}
-                        >
-                          {colour}
-                        </button>
-                      ))}
+                  {/* Color Selection */}
+                  {[...new Set(productVariants.map(v => v.Colour))].length > 1 && (
+                    <div>
+                      <h3 className="font-semibold text-gray-800 mb-2">Color</h3>
+                      <div className="flex flex-wrap gap-2">
+                        {[...new Set(productVariants.map(v => v.Colour))].map(colour => (
+                          <button
+                            key={colour}
+                            onClick={() => {
+                              const currentSelected = selectedVariant[selectedProduct.ProductID] || {};
+                              setSelectedVariant({
+                                ...selectedVariant,
+                                [selectedProduct.ProductID]: {
+                                  ...currentSelected,
+                                  Colour: colour,
+                                  // Reset Size and Model when color changes to ensure valid combination
+                                  Size: currentSelected.Size || productVariants.find(v => v.Colour === colour)?.Size,
+                                  Model: currentSelected.Model || productVariants.find(v => v.Colour === colour)?.Model
+                                }
+                              });
+                            }}
+                            className={`px-4 py-2 rounded-lg font-medium transition-all ${
+                              (selectedVariant[selectedProduct.ProductID]?.Colour || productVariants[0].Colour) === colour
+                                ? 'bg-blue-500 text-white shadow-lg'
+                                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                            }`}
+                          >
+                            {colour}
+                          </button>
+                        ))}
+                      </div>
                     </div>
-                  </div>
-                  <div>
-                    <h3 className="font-semibold text-gray-800 mb-2">Storage/Size</h3>
-                    <div className="flex flex-wrap gap-2">
-                      {[...new Set(productVariants.map(v => v.Size))].map(size => (
-                        <button
-                          key={size}
-                          onClick={() => setSelectedVariant({
-                            ...selectedVariant,
-                            [selectedProduct.ProductID]: {
-                              ...selectedVariant[selectedProduct.ProductID],
-                              Size: size
-                            }
-                          })}
-                          className={`px-4 py-2 rounded-lg font-medium transition-all ${
-                            (selectedVariant[selectedProduct.ProductID]?.Size || productVariants[0].Size) === size
-                              ? 'bg-purple-500 text-white shadow-lg'
-                              : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                          }`}
-                        >
-                          {size}
-                        </button>
-                      ))}
+                  )}
+                  
+                  {/* Size Selection */}
+                  {[...new Set(productVariants.map(v => v.Size))].length > 1 && (
+                    <div>
+                      <h3 className="font-semibold text-gray-800 mb-2">Storage/Size</h3>
+                      <div className="flex flex-wrap gap-2">
+                        {[...new Set(productVariants.map(v => v.Size))].map(size => (
+                          <button
+                            key={size}
+                            onClick={() => {
+                              const currentSelected = selectedVariant[selectedProduct.ProductID] || {};
+                              setSelectedVariant({
+                                ...selectedVariant,
+                                [selectedProduct.ProductID]: {
+                                  ...currentSelected,
+                                  Size: size,
+                                  // Reset Model when size changes to ensure valid combination
+                                  Model: currentSelected.Model || productVariants.find(v => v.Size === size)?.Model
+                                }
+                              });
+                            }}
+                            className={`px-4 py-2 rounded-lg font-medium transition-all ${
+                              (selectedVariant[selectedProduct.ProductID]?.Size || productVariants[0].Size) === size
+                                ? 'bg-purple-500 text-white shadow-lg'
+                                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                            }`}
+                          >
+                            {size}
+                          </button>
+                        ))}
+                      </div>
                     </div>
-                  </div>
+                  )}
+                  
+                  {/* Model Selection - only show if there are multiple models */}
+                  {[...new Set(productVariants.map(v => v.Model))].length > 1 && (
+                    <div>
+                      <h3 className="font-semibold text-gray-800 mb-2">Model</h3>
+                      <div className="flex flex-wrap gap-2">
+                        {[...new Set(productVariants.map(v => v.Model))].map(model => (
+                          <button
+                            key={model}
+                            onClick={() => {
+                              const currentSelected = selectedVariant[selectedProduct.ProductID] || {};
+                              setSelectedVariant({
+                                ...selectedVariant,
+                                [selectedProduct.ProductID]: {
+                                  ...currentSelected,
+                                  Model: model
+                                }
+                              });
+                            }}
+                            className={`px-4 py-2 rounded-lg font-medium transition-all ${
+                              (selectedVariant[selectedProduct.ProductID]?.Model || productVariants[0].Model) === model
+                                ? 'bg-green-500 text-white shadow-lg'
+                                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                            }`}
+                          >
+                            {model}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  )}
                 </div>
               )}
               <div className="border-t pt-6">
@@ -106,9 +155,9 @@ const ProductModal = ({ selectedProduct, setSelectedProduct, addToCart, selected
                     <span className="text-3xl font-bold text-green-600">
                       LKR {currentPrice.toLocaleString()}
                     </span>
-                    {currentPrice !== selectedProduct.Base_price && (
+                    {parseFloat(currentPrice) !== parseFloat(selectedProduct.Base_price) && (
                       <span className="text-xl text-gray-400 line-through ml-3">
-                        LKR {selectedProduct.Base_price.toLocaleString()}
+                        LKR {parseFloat(selectedProduct.Base_price).toLocaleString()}
                       </span>
                     )}
                   </div>

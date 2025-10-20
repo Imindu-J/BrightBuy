@@ -1,4 +1,5 @@
 import React from 'react';
+import { getImageUrl, handleImageError } from '../utils/imageUtils';
 
 const CartModal = ({ cartItems, setShowCart, updateQuantity, getTotalPrice, handleCheckout, currentUser, setShowCheckout }) => {
   return (
@@ -27,9 +28,10 @@ const CartModal = ({ cartItems, setShowCart, updateQuantity, getTotalPrice, hand
             {cartItems.map(item => (
               <div key={`${item.CartID}-${item.VariantID}`} className="flex items-center space-x-4 bg-gray-50 p-4 rounded-xl">
                 <img
-                  src={item.image}
+                  src={getImageUrl(item.image)}
                   alt={item.ProductName}
                   className="w-20 h-20 object-cover rounded-lg"
+                  onError={(e) => handleImageError(e, item.image)}
                 />
                 <div className="flex-1">
                   <h3 className="font-semibold text-gray-800">{item.ProductName}</h3>
@@ -40,16 +42,16 @@ const CartModal = ({ cartItems, setShowCart, updateQuantity, getTotalPrice, hand
                 <div className="flex items-center space-x-3">
                   <button
                     onClick={() => updateQuantity(item.CartID, item.VariantID, -1)}
-                    className="p-1 bg-gray-200 hover:bg-gray-300 rounded-full"
+                    className="p-1 bg-gray-200 hover:bg-gray-300 rounded-full flex items-center justify-center w-8 h-8"
                   >
-                    −
+                    <span className="text-lg font-bold">-</span>
                   </button>
                   <span className="font-semibold text-lg w-8 text-center">{item.Quantity}</span>
                   <button
                     onClick={() => updateQuantity(item.CartID, item.VariantID, 1)}
-                    className="p-1 bg-gray-200 hover:bg-gray-300 rounded-full"
+                    className="p-1 bg-gray-200 hover:bg-gray-300 rounded-full flex items-center justify-center w-8 h-8"
                   >
-                    ＋
+                    <span className="text-lg font-bold">+</span>
                   </button>
                 </div>
               </div>
