@@ -119,6 +119,14 @@ const BrightBuyEcommerce = () => {
     }
   }, []);
 
+  // Ensure order history is scoped to the logged-in user only (customers)
+  // Clear any stale orders when the role is not 'customer' or user logs out
+  useEffect(() => {
+    if (!currentUser || currentUser.Role !== 'customer') {
+      setOrderHistory([]);
+    }
+  }, [currentUser]);
+
   // Load user's cart from backend
   const loadUserCart = async (token) => {
     try {
