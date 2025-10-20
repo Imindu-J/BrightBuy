@@ -1,9 +1,0 @@
-frontend_ss/
-node_modules/
-
-*.txt
-*.pdf
-.env
-*.jpg
-
-!requirements.txt
