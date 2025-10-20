@@ -195,6 +195,7 @@ const AdminDashboard = ({ currentUser, setCurrentUser, setCurrentPage }) => {
             <Reports 
               products={productsWithStock}
               orders={orders}
+              categories={categories}
             />
           )}
         </div>
