@@ -1,6 +1,19 @@
-import React from 'react';
+import React, { useState } from 'react';
+import PasswordResetModal from './PasswordResetModal';
 
 const ProfilePage = ({ currentUser, orderHistory, setCurrentPage, setCurrentUser, loadOrderHistory }) => {
+  const [isEditing, setIsEditing] = useState(false);
+  const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false);
+  const [editForm, setEditForm] = useState({
+    username: '',
+    email: '',
+    phoneNumber: '',
+    address: ''
+  });
+  const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
+  const [loading, setLoading] = useState(false);
+
   // Load order history when component mounts
   React.useEffect(() => {
     if (loadOrderHistory) {
@@ -8,10 +21,33 @@ const ProfilePage = ({ currentUser, orderHistory, setCurrentPage, setCurrentUser
     }
   }, [loadOrderHistory]);
 
+  // Debug: Log currentUser to see what data we have
+  React.useEffect(() => {
+    console.log('ProfilePage currentUser:', currentUser);
+    console.log('CreatedAt value:', currentUser?.CreatedAt);
+  }, [currentUser]);
+
+  // Initialize edit form when user data changes
+  React.useEffect(() => {
+    if (currentUser) {
+      setEditForm({
+        username: currentUser.UserName || '',
+        email: currentUser.Email || '',
+        phoneNumber: currentUser.PhoneNumber || '',
+        address: currentUser.User_Address || ''
+      });
+    }
+  }, [currentUser]);
+
   // Helper function to format date to "Month Year" format
   const formatDateToMonthYear = (dateString) => {
     if (!dateString) return 'Unknown';
     const date = new Date(dateString);
+    // Check if the date is valid
+    if (isNaN(date.getTime())) {
+      console.log('Invalid date string:', dateString);
+      return 'Unknown';
+    }
     return date.toLocaleDateString('en-US', { 
       year: 'numeric', 
       month: 'long' 
@@ -22,6 +58,71 @@ const ProfilePage = ({ currentUser, orderHistory, setCurrentPage, setCurrentUser
   const capitalizeRole = (role) => {
     if (!role) return 'User';
     return role.charAt(0).toUpperCase() + role.slice(1);
+  };
+
+  // Handle form input changes
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setEditForm(prev => ({
+      ...prev,
+      [name]: value
+    }));
+    // Clear messages when user starts typing
+    if (error) setError('');
+    if (success) setSuccess('');
+  };
+
+  // Handle profile update
+  const handleProfileUpdate = async (e) => {
+    e.preventDefault();
+    setError('');
+    setSuccess('');
+    setLoading(true);
+
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch('http://localhost:5000/auth/update-profile', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify(editForm)
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        setSuccess(data.message);
+        setCurrentUser(data.user);
+        setIsEditing(false);
+      } else {
+        setError(data.error || 'Failed to update profile');
+      }
+    } catch (err) {
+      setError('Network error. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Handle cancel edit
+  const handleCancelEdit = () => {
+    setEditForm({
+      username: currentUser.UserName || '',
+      email: currentUser.Email || '',
+      phoneNumber: currentUser.PhoneNumber || '',
+      address: currentUser.User_Address || ''
+    });
+    setError('');
+    setSuccess('');
+    setIsEditing(false);
+  };
+
+  // Handle password change success
+  const handlePasswordChangeSuccess = (message) => {
+    setSuccess(message);
+    setTimeout(() => setSuccess(''), 5000);
   };
 
   return (
@@ -45,42 +146,110 @@ const ProfilePage = ({ currentUser, orderHistory, setCurrentPage, setCurrentUser
         <div className="p-8">
           <div className="grid md:grid-cols-2 gap-8">
             <div>
-              <h2 className="text-2xl font-bold text-gray-800 mb-6">Account Information</h2>
-              <div className="space-y-4">
+              <div className="flex justify-between items-center mb-6">
+                <h2 className="text-2xl font-bold text-gray-800">Account Information</h2>
+                {!isEditing ? (
+                  <button
+                    onClick={() => setIsEditing(true)}
+                    className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition-colors"
+                  >
+                    Edit Profile
+                  </button>
+                ) : (
+                  <div className="flex space-x-2">
+                    <button
+                      onClick={handleCancelEdit}
+                      className="bg-gray-500 text-white px-4 py-2 rounded-lg hover:bg-gray-600 transition-colors"
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      onClick={handleProfileUpdate}
+                      disabled={loading}
+                      className="bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600 transition-colors disabled:opacity-50"
+                    >
+                      {loading ? 'Saving...' : 'Save'}
+                    </button>
+                  </div>
+                )}
+              </div>
+
+              {error && (
+                <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mb-4">
+                  {error}
+                </div>
+              )}
+
+              {success && (
+                <div className="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-lg mb-4">
+                  {success}
+                </div>
+              )}
+
+              <form onSubmit={handleProfileUpdate} className="space-y-4">
                 <div>
                   <label className="block text-gray-600 font-medium mb-1">Full Name</label>
                   <input
                     type="text"
-                    value={currentUser?.UserName || ''}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-                    readOnly
+                    name="username"
+                    value={editForm.username}
+                    onChange={handleInputChange}
+                    className={`w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 ${
+                      isEditing ? '' : 'bg-gray-50'
+                    }`}
+                    readOnly={!isEditing}
+                    required
                   />
                 </div>
                 <div>
                   <label className="block text-gray-600 font-medium mb-1">Email</label>
                   <input
                     type="email"
-                    value={currentUser?.Email || ''}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-                    readOnly
+                    name="email"
+                    value={editForm.email}
+                    onChange={handleInputChange}
+                    className={`w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 ${
+                      isEditing ? '' : 'bg-gray-50'
+                    }`}
+                    readOnly={!isEditing}
+                    required
                   />
                 </div>
                 <div>
                   <label className="block text-gray-600 font-medium mb-1">Phone</label>
                   <input
                     type="tel"
-                    value={currentUser?.PhoneNumber || ''}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                    name="phoneNumber"
+                    value={editForm.phoneNumber}
+                    onChange={handleInputChange}
+                    className={`w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 ${
+                      isEditing ? '' : 'bg-gray-50'
+                    }`}
+                    readOnly={!isEditing}
                   />
                 </div>
                 <div>
                   <label className="block text-gray-600 font-medium mb-1">Address</label>
                   <textarea
-                    value={currentUser?.User_Address || ''}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                    name="address"
+                    value={editForm.address}
+                    onChange={handleInputChange}
+                    className={`w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 ${
+                      isEditing ? '' : 'bg-gray-50'
+                    }`}
                     rows="3"
+                    readOnly={!isEditing}
                   />
                 </div>
+              </form>
+
+              <div className="mt-6">
+                <button
+                  onClick={() => setIsPasswordModalOpen(true)}
+                  className="bg-orange-500 text-white px-4 py-2 rounded-lg hover:bg-orange-600 transition-colors"
+                >
+                  Change Password
+                </button>
               </div>
             </div>
             <div>
@@ -146,6 +315,12 @@ const ProfilePage = ({ currentUser, orderHistory, setCurrentPage, setCurrentUser
         </div>
       </div>
     </div>
+
+    <PasswordResetModal
+      isOpen={isPasswordModalOpen}
+      onClose={() => setIsPasswordModalOpen(false)}
+      onSuccess={handlePasswordChangeSuccess}
+    />
   </div>
   );
 };
